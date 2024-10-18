@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Completion Page</title>
+</head>
+
+<body>
+  <div class="order-page">
+    <div class="detail">
+      <p>Chi tiết đơn hàng</p>
+    </div>
+    <header>
+      <button class="back-btn" (click)="goBack()">&lt; TRỞ LẠI</button>
+      <div class="order-info">
+        <span class="order-id">MÃ ĐƠN HÀNG: {{orderDetail?.orderId}}</span>
+        <span *ngIf="orderDetail?.status === 4" style="color: teal;">HOÀN THÀNH</span>
+        <span *ngIf="orderDetail?.status === 1" style="color: orange;">ĐỢI XÁC NHẬN ĐƠN HÀNG</span>
+        <span *ngIf="orderDetail?.status === 7" style="color: green;">ĐANG GIAO HÀNG</span>
+        <span *ngIf="orderDetail?.status === 2" style="color: blue;">ĐÃ CHẤP NHẬN ĐƠN HÀNG</span>
+        <span *ngIf="orderDetail?.status === 6" style="color: brown;">ĐANG CHUẨN BỊ ĐƠN HÀNG</span>
+        <span *ngIf="orderDetail?.status === 5 || orderDetail?.status === 8 " style="color: red;">ĐÃ HỦY</span>
+      </div>
+    </header>
+    <div class="order-tracking" *ngIf="orderDetail?.status!==5 && orderDetail?.status!==8 && orderDetail?.type===2">
+      <div *ngFor="let step of steps; let i = index" class="order-step"
+        [ngClass]="{'completed': isCompleted(i), 'pending': !isCompleted(i)}">
+        <div class="step-icon">
+          <i [class]="step.icon"></i>
+        </div>
+        <div class="step-text">
+          <h4>{{ step.title }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <section class="shipping-info" *ngIf="orderDetail?.type===2">
+      <div class="shipping-details">
+        <h2>Địa Chỉ Nhận Hàng:</h2>
+        <p>{{orderDetail?.consigneeName}}</p>
+        <p>{{orderDetail?.guestPhone}}</p>
+        <p>{{orderDetail?.guestAddress}}</p>
+      </div>
+    </section>
+    <section class="shipping-info" *ngIf="orderDetail?.type===3">
+      <div class="shipping-details">
+        <h2>Thông tin đặt bàn:</h2>
+        <p>Tên khách hàng: {{orderDetail?.consigneeName}}</p>
+        <p>Số điện thoại: {{orderDetail?.guestPhone}}</p>
+        <p>Thời gian đặt bàn: {{ orderDetail?.reservation.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</p>
+        <p>Số người: {{orderDetail?.reservation.guestNumber}}</p>
+      </div>
+    </section>
+    <hr>
+    <section class="order-summary">
+      <div class="pr">
+        <div *ngFor="let item of orderDetail?.orderDetails" class="product">
+          <img [src]="item.imageUrl" [alt]="item.itemName" class="product-image">
+          <div class="product-details">
+            <h3>{{ item.itemName }}</h3>
+            <p>Số lượng: {{ item.quantity }}</p>
+          </div>
+          <div class="product-price">{{ item.unitPrice | currencyFormat}}</div>
+        </div>
+      </div>
+
+      <div class="price-breakdown">
+        <div class="price-total">
+          <span>Tổng tiền hàng:</span>
+          <span>{{orderDetail?.totalAmount | currencyFormat}}</span>
+        </div>
+        <div class="price-total">
+          <span>Khuyến mãi:</span>
+          <span>{{orderDetail?.totalAmount*orderDetail?.discountPercent/100 | currencyFormat}}</span>
+        </div>
+        <div class="price-total">
+          <span>Thành tiền:</span>
+          <span>{{orderDetail?.totalAmount - (orderDetail?.totalAmount*orderDetail?.discountPercent/100) |
+            currencyFormat}}</span>
+        </div>
+        <div class="price-total" *ngIf="orderDetail?.deposits>0">
+          <span>Đã thanh toán:</span>
+          <span>{{orderDetail?.deposits | currencyFormat}}</span>
+        </div>
+      </div>
+      <hr>
+      <div>
+        <p>Phương thức thanh toán: {{orderDetail?.deposits===0?'Thanh toán khi nhận hàng':'Thanh toán chuyển khoản qua VNPay'}}</p>
+        <button class="btn btn-primary btn-sm" (click)="reorder(orderDetail?.orderId)"
+          *ngIf="orderDetail?.status === 4">Mua Lại</button>
+        <button class="btn btn-danger btn-sm" data-bs-target="#cancelOrderModal" data-bs-toggle="modal"
+          *ngIf="(orderDetail?.status === 1 || orderDetail?.status === 2 || orderDetail?.status === 6)&&isServed===false">Hủy đơn</button>
+      </div>
+      <hr>
+      <div *ngIf="orderDetail?.status===5 || orderDetail?.status===8">
+        <p style="color: red;">Hủy bởi: {{orderDetail?.cancelBy}}</p>
+        <p style="color: red;">Lý do hủy: {{orderDetail?.cancelationReason}}</p>
+      </div>
+      <div *ngIf=" orderDetail?.status===8">
+        <hr>
+        <p style="color: red;">Tình trạng đơn: Đã hoàn tiền</p>
+        <p style="color: red;">Người hoàn tiền: {{orderDetail?.staffFirstName}} {{orderDetail?.staffLastName}}</p>
+        <p style="color: red;">Ngày hoàn tiền: {{orderDetail?.refundDate | date:'dd/MM/yyyy - HH:mm'}}</p>
+      </div>
+
+    </section>
+  </div>
+</body>
+
+</html>
+
+<!-- Cancel Order Confirmation Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelOrderModalLabel">Xác nhận hủy đơn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn hủy đơn này không?</p>
+        <div class="form-group">
+          <label for="cancelationReason">Lý do hủy đơn:</label>
+          <br><br>
+          <div class="form-check">
+            <input type="radio" id="reason1" name="cancelationReason" class="form-check-input"
+              [(ngModel)]="cancelationReason" value="Không còn nhu cầu" />
+            <label class="form-check-label" for="reason1"> Không còn nhu cầu</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" id="reason2" name="cancelationReason" class="form-check-input"
+              [(ngModel)]="cancelationReason" value="Đơn hàng sai" />
+            <label class="form-check-label" for="reason2"> Thông tin đơn hàng không chính xác</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" id="reason3" name="cancelationReason" class="form-check-input"
+              [(ngModel)]="cancelationReason" value="Thời gian giao hàng quá lâu" />
+            <label class="form-check-label" for="reason3"> Muốn thay đổi sản phẩm trong đơn hàng </label>
+          </div>
+          <div class="form-check">
+            <input type="radio" id="reason5" name="cancelationReason" class="form-check-input"
+              [(ngModel)]="cancelationReason" value="Lý do khác" />
+            <label class="form-check-label" for="reason5">Lý do khác</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Đóng
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" data-bs-dismiss="modal"
+          (click)="cancelOrder(orderDetail?.orderId, orderDetail?.reservation?.reservationId)">
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,368 @@
+body{
+  background: #ddd;
+  min-height: 100vh;
+  vertical-align: middle;
+  display: flex;
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+.title{
+  margin-bottom: 5vh;
+}
+.card{
+  margin: auto;
+  max-width: 1500px;
+  width: 90%;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 1rem;
+  border: transparent;
+}
+@media(max-width:767px){
+  .card{
+      margin: 3vh auto;
+  }
+}
+.cart{
+  background-color: #fff;
+  padding: 0vh 5vh;
+  border-bottom-left-radius: 1rem;
+  border-top-left-radius: 1rem;
+}
+@media(max-width:767px){
+  .cart{
+      padding: 4vh;
+      border-bottom-left-radius: unset;
+      border-top-right-radius: 1rem;
+  }
+}
+.summary{
+  background-color: #ddd;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  padding: 4vh;
+  color: rgb(65, 65, 65);
+}
+@media(max-width:767px){
+  .summary{
+  border-top-right-radius: unset;
+  border-bottom-left-radius: 1rem;
+  }
+}
+.summary .col-2{
+  padding: 0;
+}
+.summary .col-10
+{
+  padding: 0;
+}.row{
+  margin: 0;
+}
+.title b{
+  font-size: 1.5rem;
+}
+.main{
+  margin: 0;
+  padding: 2vh 0;
+  width: 100%;
+}
+.col-2, .col{
+  padding: 0 1vh;
+}
+a{
+  padding: 0 1vh;
+}
+.close{
+  margin-left: 200px;
+  font-size: 1rem;
+}
+img{
+  width: 3.5rem;
+}
+.back-to-shop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-to-shop button {
+  background-color: red;         /* Màu nền của nút */
+  flex-grow: 0;                  /* Không cho phép nút mở rộng */
+  width: auto;                   /* Kích thước nút tự động phù hợp với nội dung */
+  margin-right: 10px;            /* Khoảng cách phải của nút */
+  margin-bottom: 30px;           /* Khoảng cách dưới của nút */
+  font-size: 15px;               /* Kích thước chữ của nút */
+  padding: 10px 20px;            /* Khoảng cách bên trong nút, thêm padding cho dễ nhìn */
+  color: white;                  /* Màu chữ của nút */
+  border: none;                  /* Bỏ viền mặc định của nút */
+  border-radius: 4px;            /* Bo tròn các góc của nút */
+  cursor: pointer;               /* Con trỏ chuột thay đổi khi di chuột qua nút */
+  transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu nền mượt mà khi di chuột vào nút */
+}
+
+.back-to-shop button:hover {
+  background-color: darkred; /* Thay đổi màu nền khi di chuột qua nút */
+}
+.back-to-shop a  {
+  font-size: 20px; /* Kích thước chữ mong muốn */
+}
+
+h5{
+  margin-top: 4vh;
+}
+hr{
+  margin-top: 1.25rem;
+}
+form{
+  padding: 2vh 0;
+}
+select{
+  border: 1px solid rgba(0, 0, 0, 0.137);
+  padding: 1.5vh 1vh;
+  margin-bottom: 4vh;
+  outline: none;
+  width: 100%;
+  background-color: rgb(247, 247, 247);
+}
+input{
+  border: 1px solid rgba(0, 0, 0, 0.137);
+  padding: 1vh;
+  margin-bottom: 4vh;
+  outline: none;
+  width: 100%;
+  background-color: rgb(247, 247, 247);
+}
+input:focus::-webkit-input-placeholder
+{
+    color:transparent;
+}
+.btn{
+  background-color: #000;
+  border-color: #000;
+  color: white;
+  width: 100%;
+  font-size: 0.7rem;
+  padding: 1vh;
+  border-radius: 0;
+}
+.btn:focus{
+  box-shadow: none;
+  outline: none;
+  box-shadow: none;
+  color: white;
+  -webkit-box-shadow: none;
+  -webkit-user-select: none;
+  transition: none;
+}
+.btn:hover{
+  color: white;
+}
+a{
+  color: black;
+}
+a:hover{
+  color: black;
+  text-decoration: none;
+}
+#code{
+  background-image: linear-gradient(to left, rgba(255, 255, 255, 0.253) , rgba(255, 255, 255, 0.185)), url("https://img.icons8.com/small/16/000000/long-arrow-right.png");
+  background-repeat: no-repeat;
+  background-position-x: 95%;
+  background-position-y: center;
+}
+span {
+  display: inline-flex;
+  align-items: center;
+}
+.icon {
+  font-size: 10px;
+  padding: 0 10px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: #007bff;
+}
+
+.price-close .price {
+  font-size: 16px;  /* Điều chỉnh kích thước cho giá tiền */
+  margin-right: 10px;  /* Khoảng cách giữa giá tiền và nút close */
+}
+.price-close .close {
+  cursor: pointer;  /* Thêm con trỏ để hiển thị khi hover */
+  font-size: 16px;  /* Điều chỉnh kích thước cho phù hợp với giá tiền */
+  display: flex;
+  align-items: center;  /* Đảm bảo biểu tượng được căn giữa theo chiều dọc */
+  margin-top: -25px; /* Điều chỉnh khoảng cách trên nếu cần */
+}
+/* Điều chỉnh khoảng cách giữa các dòng trong form */
+.col-md-6 p {
+  margin-bottom: 5px;
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox label {
+  margin-right: 30px; /* Add some spacing between the label and checkbox */
+}
+
+.checkbox input[type="checkbox"] {
+  height: 16px; /* Adjust the height of the checkbox */
+  width: 16px; /* Adjust the width of the checkbox */
+  margin-top: 40px;
+}
+
+.cart-container {
+  max-height: 400px; /* Adjust the height as needed */
+  overflow-y: hidden; /* Prevent overflow for the entire container */
+}
+
+.cart-header {
+  position: sticky;
+  top: 0;
+  background-color: white; /* Ensure background matches the container */
+  z-index: 10; /* Keep the header above the scrollable content */
+  padding: 10px 0; /* Optional: add padding for better spacing */
+}
+
+.cart-items {
+  max-height: 350px; /* Adjust the height based on the container height */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.cart-items .row.main {
+  display: flex;
+  align-items: center;
+  margin: 10px 0; /* Optional: add some spacing between rows */
+}
+
+.cart-items img {
+  max-width: 100%;
+  height: 56px;
+  object-fit: cover; /* Ensure images are properly contained */
+}
+.success-message {
+  padding: 20px; /* Padding bao quanh nội dung */
+  background-color: #f0f0f0; /* Màu nền */
+  border: 1px solid #ccc; /* Viền */
+  border-radius: 8px; /* Bo góc */
+  text-align: center; /* Căn giữa nội dung */
+}
+
+.success-message h4 {
+  margin-bottom: 10px; /* Khoảng cách giữa các đoạn text */
+  color: #333; /* Màu chữ */
+}
+
+.success-message h3 {
+  margin-top: 20px; /* Khoảng cách từ h4 lớn nhất đến h3 */
+  color: #555; /* Màu chữ */
+}
+.dive{
+  font-size: 18px;
+}
+/* Modal Customization */
+.modal-content {
+  border-radius: 8px; /* Bo tròn các góc của modal */
+  border: none; /* Bỏ viền mặc định của modal */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Đổ bóng cho modal */
+}
+
+.modal-header {
+  background-color: #f8f9fa; /* Màu nền cho phần đầu của modal */
+  border-bottom: 1px solid #dee2e6; /* Đường viền dưới của phần đầu modal */
+  border-top-left-radius: 8px; /* Bo tròn góc trên bên trái */
+  border-top-right-radius: 8px; /* Bo tròn góc trên bên phải */
+  padding: 15px 20px; /* Khoảng cách bên trong phần đầu modal */
+}
+
+.modal-title {
+  font-size: 18px; /* Kích thước chữ cho tiêu đề */
+  font-weight: 600; /* Độ đậm chữ cho tiêu đề */
+  color: #333; /* Màu chữ của tiêu đề */
+}
+
+.btn-close {
+  background-color: transparent; /* Nền trong suốt cho nút đóng */
+  border: none; /* Bỏ viền cho nút đóng */
+  font-size: 20px; /* Kích thước chữ cho nút đóng */
+  color: #000; /* Màu chữ của nút đóng */
+}
+
+.modal-body {
+  padding: 20px; /* Khoảng cách bên trong phần thân modal */
+  font-size: 16px; /* Kích thước chữ cho nội dung */
+  color: #555; /* Màu chữ cho nội dung trong modal */
+}
+
+.modal-body p {
+  margin-bottom: 15px; /* Khoảng cách dưới đoạn văn */
+}
+
+.form-group {
+  margin-top: 10px; /* Khoảng cách phía trên nhóm lý do hủy đơn */
+}
+
+.form-group label {
+  font-size: 14px; /* Kích thước chữ của nhãn */
+  font-weight: 500; /* Độ đậm của nhãn */
+  color: #444; /* Màu chữ của nhãn */
+}
+
+.form-check {
+  display: flex; /* Sử dụng flexbox để căn chỉnh radio button và nhãn */
+  height: 30px;
+}
+
+.form-check-input {
+  margin-right: 10px; /* Khoảng cách giữa radio button và nhãn */
+}
+
+.form-check-label {
+  font-size: 14px; /* Kích thước chữ của nhãn */
+  color: #333; /* Màu chữ cho nhãn */
+}
+.form-check-input{
+  font-size: 10px;
+  width: 10px;
+    height: 10px;
+}
+.form-check-input:checked {
+  background-color: gray;
+  border-color: gray;
+}
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.modal-footer .btn {
+  padding: 5px 10px;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+
+.modal-footer .btn-secondary {
+  background-color: #6c757d; /* Màu nền cho nút Đóng */
+  color: white; /* Màu chữ của nút Đóng */
+  border: none; /* Bỏ viền nút Đóng */
+}
+
+.modal-footer .btn-secondary:hover {
+  background-color: #5a6268; /* Màu nền khi hover nút Đóng */
+}
+
+.modal-footer .btn-danger {
+  background-color: #dc3545; /* Màu nền cho nút Xác nhận */
+  color: white; /* Màu chữ của nút Xác nhận */
+  border: none; /* Bỏ viền nút Xác nhận */
+}
+
+.modal-footer .btn-danger:hover {
+  background-color: #c82333; /* Màu nền khi hover nút Xác nhận */
+}

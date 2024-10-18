@@ -1,0 +1,585 @@
+
+/* Base */
+:root {
+  --clr-primary: #fe5722;
+  --clr-secondary: #272d36;
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #fff;
+  color: var(--clr-secondary);
+  overflow-x: hidden;
+
+}
+
+.section {
+  width: 100%;
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn giữa theo chiều ngang */
+  justify-content: center; /* Căn giữa theo chiều dọc */
+  text-align: center; /* Căn giữa văn bản */
+}
+.section-menu{
+  width: 100%;
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn giữa theo chiều ngang */
+  justify-content: center; /* Căn giữa theo chiều dọc */
+  text-align: center; /* Căn giữa văn bản */
+  background-color: #fff5f2;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  padding: 0 30px;
+}
+
+.primary {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.secondary {
+  font-size: 44px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.tertiary {
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 14px 20px;
+  background-color: green; /* Màu nền của nút */
+  border-radius: 40px; /* Bo tròn các góc của nút */
+  border: 1px solid white; /* Đường viền của nút cùng màu với nền */
+  color: white; /* Màu chữ của nút */
+  text-decoration: none; /* Loại bỏ gạch chân của liên kết */
+  font-size: 22px; /* Kích thước chữ */
+  display: inline-block; /* Để nút hiển thị theo dòng */
+  margin: 20px 0; /* Khoảng cách trên và dưới nút */
+  cursor: pointer; /* Hiệu ứng con trỏ khi di chuột qua nút */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Hiệu ứng chuyển màu mượt mà */
+}
+
+.btn:hover {
+  background-color: green; /* Màu nền khi di chuột qua nút */
+  border-color: green; /* Đổi màu đường viền khi di chuột qua nút */
+  color: #fff; /* Màu chữ khi di chuột qua nút */
+}
+
+.btn:active {
+  background-color: #004085; /* Màu nền khi nhấn nút */
+  border-color: #004085; /* Đổi màu đường viền khi nhấn nút */
+  color: #fff; /* Màu chữ khi nhấn nút */
+}
+
+.btn:focus {
+  outline: none; /* Loại bỏ đường viền mặc định khi nút được chọn */
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2); /* Tạo bóng xung quanh nút khi được chọn */
+}
+
+/* End Base */
+
+/* Hero Section */
+#hero-section {
+  background: #fff5f2;
+}
+
+.text,
+.visual {
+  width: 50%;
+}
+
+.text {
+  margin: 0 20px;
+}
+
+.visual img {
+  width: 80%;
+  height: auto;
+  display: block;
+}
+
+#hero-section .text {
+  margin-left: 30px;
+}
+
+#hero-section .visual img {
+  margin-left: auto;
+}
+/* End Hero Section */
+/* How It Works */
+#how-it-works {
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.box {
+  border: 1px solid #b2b2b2;
+  padding: 25px 5px;
+  margin: 0 10px;
+  border-radius: 8px;
+  font-size: 18px;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+.fas{
+  font-family: "Font Awesome 6 Free";
+  font-size: 35px; /* Đặt kích thước cho các biểu tượng */
+  color: var(--clr-primary); /* Đặt màu cho các biểu tượng */
+}
+.box i {
+  font-size: 35px;
+  color: orange;
+  margin: 15px 0;
+}
+
+.box.active,
+.box:hover {
+  border-color: var(--clr-primary);
+  background: var(--clr-primary);
+}
+
+/* End How It Works */
+
+
+/* About */
+#about .visual img,
+#app .visual img {
+  margin-right: auto;
+}
+/* End About */
+
+/* Restaurant Menu */
+.category {
+  list-style: none;
+  text-align: center;
+  margin: 20px 0 40px 0;
+}
+
+.category li {
+  display: inline-block;
+  margin: 0 15px;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.category li.active {
+  color: var(--clr-primary);
+}
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Giá sắp xếp bên phải theo chiều dọc */
+}
+.discounted-price {
+  color: red; /* Màu đỏ cho giá đã giảm */
+  font-weight: bold; /* In đậm giá đã giảm */
+}
+.original-price {
+  text-decoration: line-through; /* Gạch ngang giá gốc */
+  color: gray; /* Màu xám cho giá gốc */
+}
+
+.no-discount {
+  text-decoration: none; /* Bỏ gạch ngang nếu không có giá giảm */
+  color: black; /* Màu đen cho giá gốc nếu không có giá giảm */
+}
+.restaurant-menu {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.menu-item {
+  width: 260px;
+  margin: 0 auto;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid black;
+  padding: 10px; /* Thêm khoảng cách bên trong */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng chuyển đổi */
+}
+
+.menu-item:hover {
+  transform: translateY(-5px); /* Nhẹ nhàng nâng lên khi hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Bóng đổ lớn hơn khi hover */
+  background-color: #f9f9f9; /* Thay đổi màu nền khi hover */
+}
+
+
+.menu-item img {
+  width: 100%;
+}
+
+.order {
+  justify-content: space-between;
+}
+
+.btn-menu {
+  padding: 6px 10px;
+  font-size: 16px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--clr-primary);
+  color: var(--clr-primary);
+  border: 1px solid black;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.location {
+  font-size: 18px;
+  font-weight: 500;
+}
+/* End Restaurant Menu */
+
+
+/* Footer */
+.footer {
+  background: var(--clr-secondary);
+  color: #b2b2b2;
+  padding: 30px 0;
+}
+
+.footer .container {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.footer h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.footer ul {
+  list-style: none;
+  line-height: 30px;
+  font-size: 16px;
+}
+
+.footer ul li {
+  cursor: pointer;
+}
+
+.footer-about {
+  width: 35%;
+}
+
+.copyright {
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 30px;
+  border-top: 1px solid #b2b2b2;
+}
+/* End Footer */
+
+/* Responsive  */
+@media (max-width: 952px) {
+  label.logo {
+    font-size: 30px;
+    padding-left: 20px;
+  }
+
+  nav ul li a {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 858px) {
+  .checkbtn {
+    display: block;
+    color: var(--clr-primary);
+  }
+
+  ul {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 80px;
+    left: -100%;
+    top: 80px;
+    transition: all 0.5s;
+    text-align: center;
+    background: #fff5f2;
+  }
+
+  nav ul li {
+    display: block;
+    margin: 50px 0;
+    line-height: 30px;
+  }
+
+  nav ul li a {
+    font-size: 20px;
+  }
+
+  .menu a:hover,
+  .menu a.active {
+    background: none;
+    color: var(--clr-primary);
+  }
+
+  #check:checked ~ ul {
+    left: 0;
+  }
+
+  #hero-section {
+    margin-top: 80px;
+  }
+
+  #hero-section .text {
+    margin-left: auto;
+  }
+
+  .flex {
+    flex-direction: column;
+  }
+
+  .visual,
+  .text {
+    width: 70%;
+    margin: 15px auto;
+    text-align: center;
+  }
+
+  .download,
+  .user {
+    flex-direction: row;
+  }
+
+  .user {
+    justify-content: center;
+  }
+
+  .visual img {
+    margin: 0 auto;
+  }
+
+  .box {
+    margin: 15px 0;
+  }
+
+  .restaurant-menu {
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+  }
+
+  .faq,
+  .menu-item {
+    width: 80%;
+  }
+
+  .primary {
+    font-size: 56px;
+  }
+
+  .secondary {
+    font-size: 40px;
+  }
+
+  .tertiary {
+    font-size: 20px;
+  }
+
+  .footer-about {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quick-links,
+  .get-in-touch,
+  .footer-category {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .text,
+  .visual {
+    width: 90%;
+  }
+
+  .restaurant-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .faq {
+    width: 90%;
+  }
+
+  .app-store {
+    margin: 10px 0;
+  }
+
+  .download {
+    flex-direction: column;
+  }
+
+  .primary {
+    font-size: 48px;
+  }
+
+  .secondary {
+    font-size: 32px;
+  }
+
+  .tertiary {
+    font-size: 17px;
+  }
+}
+/* End Responsive  */
+
+
+
+
+
+.youtube {
+  position: fixed;
+  bottom: 40px;
+  right: 70px;
+  text-decoration: none;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 6px;
+  box-shadow: 0 2px 2px 3px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.youtube p {
+  font-size: 22px;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Một lớp phủ mờ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  position: relative;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 70%;
+  max-width: 600px;
+  overflow: hidden;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px; /* Kích thước chữ lớn hơn để dễ nhấp */
+  color: #333; /* Màu sắc của biểu tượng đóng */
+  background-color: #fff; /* Nền trắng để làm nổi bật */
+  border-radius: 50%; /* Hình tròn để biểu tượng đóng có hình dạng đồng nhất */
+  width: 30px; /* Chiều rộng của nút đóng */
+  height: 30px; /* Chiều cao của nút đóng */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s; /* Hiệu ứng chuyển màu khi hover */
+}
+
+.close:hover {
+  background-color: #f44336; /* Màu nền khi hover */
+  color: #fff; /* Màu chữ khi hover */
+}
+
+.details-container {
+  display: flex;
+}
+
+.image-container {
+  flex: 1;
+  padding-right: 20px;
+}
+
+
+.info-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Đảm bảo nội dung được giãn đều */
+  flex-grow: 1;
+}
+
+button.add-to-cart {
+  padding: 10px 0px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  align-self: flex-end;
+  width: 150px;
+}
+
+button.add-to-cart:hover {
+  background-color: #45a049;
+}
+.discounted-price {
+  color: red; /* Màu đỏ cho giá đã giảm */
+  font-weight: bold; /* In đậm giá đã giảm */
+}
+
+.original-price {
+  text-decoration: line-through; /* Gạch ngang giá gốc */
+  color: gray; /* Màu xám cho giá gốc */
+}
+
+.no-discount {
+  text-decoration: none; /* Bỏ gạch ngang nếu không có giá giảm */
+  color: black; /* Màu đen cho giá gốc nếu không có giá giảm */
+}
+
+.small-btn {
+  padding: 5px 10px; /* Điều chỉnh padding để làm nhỏ nút */
+  font-size: 12px; /* Điều chỉnh kích thước chữ */
+  line-height: 1.5; /* Điều chỉnh line-height để căn chỉnh chữ */
+}

@@ -1,0 +1,169 @@
+<div class="menu">
+  <nav>
+    <label class="logo">EatingHouse</label>
+    <ul class="center-menu">
+      <li><a routerLink="/" routerLinkActive="active">Trang chủ</a></li>
+      <li><a routerLink="/news" routerLinkActive="active">Bài viết</a></li>
+      <li><a routerLink="/menu" routerLinkActive="active">Thực đơn</a></li>
+      <li><a routerLink="/booking" routerLinkActive="active">Đặt bàn</a></li>
+    </ul>
+    <ul class="right-menu">
+      <li *ngIf="accountId" (mouseenter)="showNotifications = true" (mouseleave)="showNotifications = false"
+        class="dropdown">
+        <a routerLink="/notification" routerLinkActive="active" class="cart-link-noti">
+          <span class="item-count-noti" [ngClass]="{'active': itemCountNoti > 0}"></span>
+          <i class='far fa-bell' style='font-size:26px'></i>
+        </a>
+
+        <div class="dropdown-menu" [class.show]="showNotifications && notifications.length > 0">
+          <ul>
+            <li *ngFor="let notification of notifications | slice:0:5" class="notification-item">
+              <div class="notification-content" (click)="viewDetails()" >
+                <p class="notification-description" style="height: 35px;">{{ notification.description }}</p>
+                <span class="notification-time" style="height: 25px;">{{ notification.time | date:'dd/MM/yyyy - HH:mm' }}</span>
+              </div>
+            </li>
+          </ul>
+          <a routerLink="/notification" class="view-all-btn">Xem tất cả</a>
+        </div>
+      </li>
+
+      <li>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          <span class="item-count">{{ itemCount }}</span>
+          <i class="fas fa-shopping-cart cart-icon"></i>
+        </a>
+      </li>
+
+      <li *ngIf="!accountId; else loggedInTemplate">
+        <a routerLink="/login" routerLinkActive="active" class="cart-link">Đăng nhập</a>
+      </li>
+
+      <ng-template #loggedInTemplate>
+        <div class="user-info d-flex align-items-center ms-3" id="utk">
+          <i class="fas fa-user-circle user-avatar" (click)="toggleDropdown()" style="font-size: 1.5rem;"></i>
+          <span class="user-name ms-2" (click)="toggleDropdown()" style="font-size: 1.2rem; cursor: pointer;">
+            {{ account?.username }}
+          </span>
+
+          <div class="dropdown-menu-container">
+            <ul class="dropdown-menu" [class.show]="dropdownOpen">
+              <li class="li-detail" style="width: 170px; cursor: pointer;">
+                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#profileModal">Xem thông tin</a>
+              </li>
+              <hr>
+              <li class="li-detail" style="width: 170px;cursor: pointer;">
+                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật khẩu</a>
+              </li>
+              <hr>
+              <li class="li-detail" style="width: 170px;cursor: pointer;">
+                <a class="dropdown-item" (click)="viewOrder()">Xem đơn hàng</a>
+              </li>
+              <hr>
+              <li class="nav-item" style="width: 170px;cursor: pointer;">
+                <a class="nav-link" (click)="logout()">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ng-template>
+
+    </ul>
+
+  </nav>
+</div>
+<div class="modal fade custom-modal" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="profileModalLabel">Thông tin cá nhân</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Profile details here -->
+        <div class="mb-3">
+          <label for="firstName" class="form-label">Họ</label>
+          <input type="text" class="form-control" id="firstName" [(ngModel)]="account.firstName">
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Tên</label>
+          <input type="text" class="form-control" id="lastName" [(ngModel)]="account.lastName">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" [(ngModel)]="account.email" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="address" class="form-label">Địa chỉ</label>
+          <input type="text" class="form-control" id="address" [(ngModel)]="account.address">
+        </div>
+        <div class="mb-3">
+          <label for="phone" class="form-label">Số điện thoại</label>
+          <input type="tel" class="form-control" id="phone" [(ngModel)]="account.phone">
+        </div>
+
+      </div>
+      <div class="modal-footer custom-modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="changeProfile()">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- change pass -->
+<div class="modal fade custom-modal" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel">Đổi mật khẩu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <!-- Condition to check if currentPassword exists -->
+        <div *ngIf="!isChangingPassword && currentPassword !== null" class="form-group">
+          <label for="currentPassword">Mật khẩu hiện tại:</label>
+          <input type="password" id="currentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại"
+            [(ngModel)]="cupass" name="currentPassword" required>
+        </div>
+
+        <!-- Always show these fields if currentPassword exists or not -->
+        <div *ngIf="currentPassword !== null" class="form-group">
+          <label for="newPassword">Mật khẩu mới:</label>
+          <input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới"
+            [(ngModel)]="newPassword" name="newPassword" required>
+        </div>
+        <div *ngIf="currentPassword !== null" class="form-group">
+          <label for="confirmNewPassword">Xác nhận mật khẩu mới:</label>
+          <input type="password" id="confirmNewPassword" class="form-control" placeholder="Xác nhận mật khẩu mới"
+            [(ngModel)]="confirmPassword" name="confirmPassword" required>
+        </div>
+
+        <!-- Always show these fields -->
+        <!-- Hide this when currentPassword is not null -->
+        <!-- Show new password and confirm password when currentPassword is not null -->
+        <div *ngIf="currentPassword === null" class="form-group">
+          <label for="newPassword">Nhập mật khẩu:</label>
+          <input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới"
+            [(ngModel)]="newPassword" name="newPassword" required>
+        </div>
+
+        <div *ngIf="currentPassword === null" class="form-group">
+          <label for="confirmNewPassword">Xác nhận mật khẩu:</label>
+          <input type="password" id="confirmNewPassword" class="form-control" placeholder="Xác nhận mật khẩu mới"
+            [(ngModel)]="confirmPassword" name="confirmPassword" required>
+        </div>
+
+
+      </div>
+      <div class="modal-footer custom-modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="changePassword()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>

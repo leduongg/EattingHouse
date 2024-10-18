@@ -1,0 +1,159 @@
+<header class="header-order-staff navbar navbar-expand-lg navbar-dark bg-custom">
+  <div class="container-fluid">
+    <a class="navbar-brand logo">
+      <img [src]="logoUrl" alt="Logo" class="logo-circle" />
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li *ngIf="accountId" (mouseenter)="showNotifications = true" (mouseleave)="showNotifications = false"
+          class="dropdown">
+          <a routerLink="/notification" routerLinkActive="active" class="cart-link-noti">
+            <span class="item-count-noti" [ngClass]="{'active': itemCountNoti > 0}"></span>
+            <i class='far fa-bell noti-icon'></i>
+          </a>
+          <div class="dropdown-menu notifications-menu" [class.show]="showNotifications && notifications.length > 0">
+            <ul class="notification-list">
+              <li *ngFor="let notification of notifications | slice:0:5" class="notification-item">
+                <div class="notification-content" (click)="viewDetails()">
+                  <p class="notification-description">{{ notification.description }}</p>
+                  <span class="notification-time">{{ notification.time | date:'dd/MM/yyyy - HH:mm' }}</span>
+                </div>
+              </li>
+            </ul>
+            <a class="view-all-btn" (click)="viewDetails()">Xem tất cả</a>
+          </div>
+        </li>
+
+
+        <!-- <li *ngIf="role===2" (mouseenter)="showNotifications = true" (mouseleave)="showNotifications = false"
+          class="dropdown">
+          <a routerLink="/notification" routerLinkActive="active" class="cart-link-noti">
+            <span class="item-count-noti" [ngClass]="{'active': itemCountNoti > 0}"></span>
+            <i class='far fa-bell noti-icon'></i>
+          </a>
+          <div class="dropdown-menu notifications-menu" [class.show]="showNotifications && notifications.length > 0">
+            <div class="notification-tabs">
+              <button [ngClass]="{'active-tab': activeTab === 'kitchen'}" (click)="setActiveTab('kitchen')">Từ
+                Bếp</button>
+              <button [ngClass]="{'active-tab': activeTab === 'customer'}" (click)="setActiveTab('customer')">Từ
+                Khách</button>
+            </div>
+            <ul class="notification-list" *ngIf="activeTab === 'kitchen'">
+              <li *ngFor="let notification of kitchenNotifications | slice:0:5" class="notification-item">
+                <div class="notification-content" (click)="viewDetails()">
+                  <p class="notification-description">{{ notification.description }}</p>
+                  <span class="notification-time">{{ notification.time | date:'dd/MM/yyyy - HH:mm' }}</span>
+                </div>
+              </li>
+            </ul>
+            <ul class="notification-list" *ngIf="activeTab === 'customer'">
+              <li *ngFor="let notification of customerNotifications | slice:0:5" class="notification-item">
+                <div class="notification-content" (click)="viewDetails()">
+                  <p class="notification-description">{{ notification.description }}</p>
+                  <span class="notification-time">{{ notification.time | date:'dd/MM/yyyy - HH:mm' }}</span>
+                </div>
+              </li>
+            </ul>
+
+            <a class="view-all-btn" (click)="viewDetails()">Xem tất cả</a>
+          </div>
+        </li> -->
+
+        <li class="nav-item">
+          <a class="nav-link logout-link" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+          </a>
+        </li>
+      </ul>
+      <div class="user-info d-flex align-items-center ms-3" id="utk">
+        <i class="fas fa-user-circle user-avatar" (click)="toggleDropdown()"></i>
+        <span class="user-name ms-2" (click)="toggleDropdown()">{{account?.username}}</span>
+
+        <ul class="dropdown-menu" [class.show]="dropdownOpen">
+          <li class="dropdown-item-separator"><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#profileModal">Xem thông tin</a></li>
+          <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật khẩu</a></li>
+        </ul>
+        
+
+      </div>
+    </div>
+  </div>
+</header>
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="profileModalLabel">Thông tin cá nhân</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Profile details here -->
+        <div class="mb-3">
+          <label for="firstName" class="form-label">Họ</label>
+          <input type="text" class="form-control" id="firstName" [(ngModel)]="account.firstName">
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Tên</label>
+          <input type="text" class="form-control" id="lastName" [(ngModel)]="account.lastName">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" [(ngModel)]="account.email">
+        </div>
+        <div class="mb-3">
+          <label for="address" class="form-label">Địa chỉ</label>
+          <input type="text" class="form-control" id="address" [(ngModel)]="account.address">
+        </div>
+        <div class="mb-3">
+          <label for="phone" class="form-label">Số điện thoại</label>
+          <input type="tel" class="form-control" id="phone" [(ngModel)]="account.phone">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="changeProfile()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- change pass -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel">Đổi mật khẩu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <div class="form-group">
+          <label for="currentPassword">Mật khẩu hiện tại:</label>
+          <input type="password" id="currentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại"
+            [(ngModel)]="currentPassword" name="currentPassword" required>
+        </div>
+        <div class="form-group">
+          <label for="newPassword">Mật khẩu mới:</label>
+          <input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới"
+            [(ngModel)]="newPassword" name="newPassword" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmNewPassword">Xác nhận mật khẩu mới:</label>
+          <input type="password" id="confirmNewPassword" class="form-control" placeholder="Xác nhận mật khẩu mới"
+            [(ngModel)]="confirmPassword" name="confirmPassword" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="changePassword()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>

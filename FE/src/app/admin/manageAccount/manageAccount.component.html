@@ -1,0 +1,244 @@
+<app-HeaderOrderStaff></app-HeaderOrderStaff>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <app-SidebarAdmin></app-SidebarAdmin>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <h1 class="text-center mb-4">Quản lý tài khoản</h1>
+
+      <!-- Search bar -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <input type="text" class="form-control" placeholder="Tìm kiếm tài khoản..." />
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary" type="button" id="button-addon2">Tìm kiếm</button>
+        </div>
+        <div class="col-md-6 text-md-right">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">Thêm tài khoản mới</button>
+        </div>
+      </div>
+
+      <!-- Account table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>STT</th>
+              <th>Họ</th>
+              <th>Tên</th>
+              <th>Số điện thoại</th>
+              <th>Địa chỉ</th>
+              <th>Email</th>
+              <th>Tên tài khoản</th>
+              <th>Mật khẩu</th>
+              <th>Chức năng</th>
+              <th>Hoạt động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let account of accounts; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ account?.firstName }}</td>
+              <td>{{ account?.lastName }}</td>
+              <td>{{ account?.phone }}</td>
+              <td>{{ account?.address }}</td>
+              <td>{{ account?.email }}</td>
+              <td>{{ account?.username }}</td>
+              <td>
+                <span class="d-flex align-items-center">
+                  <input [type]="showPasswordMap[i] ? 'text' : 'password'"
+                    [value]="account.password"
+                    class="form-control form-control-sm me-2"
+                    style="width: 150px;"
+                    readonly />
+                  <button type="button" class="btn btn-link p-0" (click)="togglePasswordVisibility(i)">
+                    <i [class]="showPasswordMap[i] ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                  </button>
+                </span>
+              </td>
+              <td>{{ account.role }}</td>
+              <td>
+                <span [ngClass]="{'text-success': account.isActive, 'text-danger': !account.isActive}">
+                  {{ account.isActive ? 'Đang hoạt động' : 'Không hoạt động' }}
+                </span>
+                <input
+                  type="checkbox"
+                  [checked]="account.isActive"
+                  (change)="toggleActiveStatus(account)"
+                  class="ms-2"
+                  [disabled]="account.role === 'Admin'"
+                />
+              </td>
+              <!-- <td>
+                <button 
+                  class="btn btn-sm btn-primary" 
+                  (click)="openUpdateRoleModal(account)" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#updateRoleModal"
+                  [disabled]="account.role === 'Admin'" 
+                >
+                  Cập nhật vai trò
+                </button>
+              </td> -->
+           
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Add Account Modal -->
+<div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAccountModalLabel">Thêm tài khoản mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="firstName" class="form-label">Họ</label>
+            <input type="text" class="form-control" id="firstName" formControlName="firstName">
+            <div *ngIf="accountForm.get('firstName')?.invalid && (accountForm.get('firstName')?.dirty || accountForm.get('firstName')?.touched)" class="text-danger">
+              Họ là bắt buộc.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="lastName" class="form-label">Tên</label>
+            <input type="text" class="form-control" id="lastName" formControlName="lastName">
+            <div *ngIf="accountForm.get('lastName')?.invalid && (accountForm.get('lastName')?.dirty || accountForm.get('lastName')?.touched)" class="text-danger">
+              Tên là bắt buộc.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email">
+            <div *ngIf="accountForm.get('email')?.invalid && (accountForm.get('email')?.dirty || accountForm.get('email')?.touched)" class="text-danger">
+              <div *ngIf="accountForm.get('email')?.errors?.['required']">Email là bắt buộc.</div>
+              <div *ngIf="accountForm.get('email')?.errors?.['email']">Email không hợp lệ.</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="username" class="form-label">Tên đăng nhập</label>
+            <input type="text" class="form-control" id="username" formControlName="username">
+            <div *ngIf="accountForm.get('username')?.invalid && (accountForm.get('username')?.dirty || accountForm.get('username')?.touched)" class="text-danger">
+              Tên đăng nhập là bắt buộc.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Mật khẩu</label>
+            <input type="password" class="form-control" id="password" formControlName="password">
+            <div *ngIf="accountForm.get('password')?.invalid && (accountForm.get('password')?.dirty || accountForm.get('password')?.touched)" class="text-danger">
+              Mật khẩu là bắt buộc.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Vai trò</label>
+            <select class="form-select" id="role" formControlName="role">
+              <option value="Manager">Manager</option>
+              <option value="Cashier">Cashier</option>
+              <option value="Chef">Chef</option>
+              <option value="OrderStaff">OrderStaff</option>
+              <option value="Ship">Ship</option>
+            </select>
+            <div *ngIf="accountForm.get('role')?.invalid && (accountForm.get('role')?.dirty || accountForm.get('role')?.touched)" class="text-danger">
+              Vai trò là bắt buộc.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="address" class="form-label">Địa chỉ</label>
+            <input type="text" class="form-control" id="address" formControlName="address">
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" id="phone" formControlName="phone">
+            <div *ngIf="accountForm.get('phone')?.invalid && (accountForm.get('phone')?.dirty || accountForm.get('phone')?.touched)" class="text-danger">
+              <div *ngIf="accountForm.get('phone')?.errors?.['required']">Số điện thoại là bắt buộc.</div>
+              <div *ngIf="accountForm.get('phone')?.errors?.['pattern']">Số điện thoại phải chứa từ 10 đến 15 chữ số.</div>
+            </div>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="isActive" formControlName="isActive">
+            <label class="form-check-label" for="isActive">
+              Kích hoạt tài khoản
+            </label>
+          </div>
+
+          <div *ngIf="errorMessages.general" class="text-danger mt-2">
+            {{ errorMessages.general }}
+          </div>
+          <div *ngIf="errorMessages.general" class="text-success mt-2">
+            {{ suscessM }}
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="onSubmit()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="pagination" *ngIf="totalPages > 0">
+  <button (click)="onPreviousPage()" [disabled]="currentPage === 1">
+    <i class="fas fa-arrow-left"></i> <!-- Icon mũi tên trái -->
+  </button>
+
+  <input type="number" [(ngModel)]="currentPage" (keyup.enter)="goToDesiredPage()" min="1" max="{{ totalPages }}">
+
+  <span>of {{ totalPages }}</span>
+
+  <button (click)="onNextPage()" [disabled]="currentPage === totalPages">
+    <i class="fas fa-arrow-right"></i> <!-- Icon mũi tên phải -->
+  </button>
+</div>
+<!-- Update Role Modal -->
+<div class="modal fade" id="updateRoleModal" tabindex="-1" aria-labelledby="updateRoleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateRoleModalLabel">Cập nhật vai trò tài khoản</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="updateRole" class="form-label">Vai trò</label>
+          <select class="form-select" id="updateRole" [(ngModel)]="selectedRole">
+            <option value="Manager">Manager</option>
+            <option value="Cashier">Cashier</option>
+            <option value="Chef">Chef</option>
+            <option value="OrderStaff">OrderStaff</option>
+            <option value="Ship">Ship</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="saveRoleChange()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+ 

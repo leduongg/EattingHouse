@@ -1,0 +1,307 @@
+
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.card {
+  padding: 16px;
+  margin: 16px;
+  width: 100%;
+  max-width: 2500px;
+  height: 700px;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 1rem;
+  border: transparent;
+  background-color: #fff;
+  display: flex; /* Added display flex */
+  flex-direction: column; /* Ensure card's children are arranged in a column */
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.error-message {
+  text-align: center;
+  margin-top: 0.5rem;
+  color: red;
+  font-size: 0.875rem;
+}
+
+.upper-section {
+  flex: 1;
+  overflow: auto;
+}
+
+.lower-section {
+  margin-top: 20px;
+  height: 300px;
+  overflow: auto; /* Thêm thanh cuộn khi cần */
+}
+
+.scrollable-tbody {
+  display: block;
+  max-height: 180px; /* Set the desired height */
+  overflow-y: auto;
+}
+
+.scrollable-tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.scrollable-tbody button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+thead, tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.grid-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dish-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dish-info p {
+  margin: 8px 0;
+}
+
+.dish-info .quantity-container {
+  display: flex;
+  align-items: center;
+}
+
+.dish-info .quantity-container input {
+  margin-left: 8px;
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.dish-info button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.dish-info button:hover {
+  background-color: #0056b3;
+}
+
+.dish-info button:focus {
+  outline: none;
+}
+/* Container for the title section */
+.title {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc; /* Optional: border for the container */
+  background-color: #f9f9f9; /* Optional: background color for the container */
+}
+
+/* Style for buttons inside the title section */
+.title button {
+  background-color: #f9f9f9; /* Match the container background */
+  color: black; /* Blue text color for unselected state */
+  border: none; /* Remove default border */
+  border-bottom: 2px solid transparent; /* Border bottom for selected effect */
+  padding: 10px 20px; /* Add padding */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  margin-right: 10px; /* Space between buttons */
+  transition: border-color 0.3s ease, color 0.3s ease; /* Smooth transition for border color and text color */
+}
+
+/* Hover effect for buttons */
+.title button:hover {
+  color: #0056b3; /* Change text color on hover */
+}
+
+/* Selected button style */
+.title button.selected {
+  border-color: #007bff; /* Blue border for the selected button */
+  color: #007bff; /* Blue text color for the selected button */
+}
+
+/* To make sure the last button doesn't have extra margin on the right */
+.title button:last-child {
+  margin-right: 0;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 80%;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.details-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.details-container h3, .details-container p {
+  margin: 10px 0;
+}
+
+.info-container {
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.item-details h4 {
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+
+.item-details p {
+  margin: 5px 0;
+}
+.back-link {
+  text-decoration: none; /* Loại bỏ gạch chân của liên kết */
+}
+
+/* Tạo kiểu cho biểu tượng */
+.back-icon {
+  cursor: pointer;
+  margin-right: 15px; /* Khoảng cách giữa biểu tượng và tiêu đề */
+  font-size: 1.8em; /* Kích thước biểu tượng */
+  color: rgb(83, 82, 82); /* Màu sắc biểu tượng */
+  transition: color 0.3s ease; /* Hiệu ứng chuyển màu khi hover */
+}
+/* Thay đổi màu sắc biểu tượng khi hover */
+.back-icon:hover {
+  color: black; /* Màu sắc mới khi hover */
+}
+.shipper-name {
+  font-weight: bold; /* In đậm tên */
+  color: #007bff; /* Màu xanh dương cho tên */
+  font-size: 1.1em; /* Tăng kích thước chữ */
+  font-family: 'Arial', sans-serif; /* Đặt kiểu chữ khác nếu cần */
+}
+/* Modal Overlay */
+.modal-backdrop.show {
+  opacity: 0.5; /* Adjust opacity if needed */
+}
+
+/* Modal Dialog */
+.modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal Content */
+.modal-content {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Header */
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Modal Footer */
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+}

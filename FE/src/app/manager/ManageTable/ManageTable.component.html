@@ -1,0 +1,301 @@
+<app-HeaderOrderStaff></app-HeaderOrderStaff>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <app-SideBar></app-SideBar>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div style="float: right;">
+        <button (click)="openManageTablesModal()" style="background-color: rgb(76, 169, 227);">Thêm bàn mới</button>
+      </div>
+      <div class="container">
+        <div class="card short-card">
+          <i class="fas fa-edit edit-icon" (click)="openEditFloorModal()" *ngIf="getFloors().length>0"></i> <!-- Icon edit -->
+          <div class="table-layout-buttons">
+            <button *ngFor="let floor of getFloors()" (click)="getTableOFFloor(floor)"
+              [class.active]="selectedFloor === floor && !isWaitingTableView">
+              {{ floor }}
+            </button>
+            <button (click)="getWaitingTable()" [class.active]="isWaitingTableView">Bàn chờ xếp</button>
+          </div>
+        </div>
+
+        <div class="card" *ngIf="!isWaitingTableView"> <!-- Hiển thị bàn theo tầng nếu không ở chế độ bàn chờ -->
+          <div class="table-grid">
+            <div class="table" *ngFor="let table of dataTable" (click)="showTableDetails(table)">
+              {{ table?.lable }}<br>
+              <hr>
+              {{ table?.status === 0 ? 'Bàn trống' : (table?.status === 1 ? 'Đang sử dụng' : 'Không hoạt động') }}
+              <span class="icon-sl"><i class="fas fa-chair"></i>{{ table?.capacity }}</span>
+              <span class="icon-table" *ngIf="table?.status === 1">&#10004;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" *ngIf="isWaitingTableView">
+          <h4>Bàn chờ xếp</h4>
+           <!-- Kiểm tra nếu danh sách waitingTables không có phần tử nào -->
+           <div *ngIf="waitingTables?.length === 0" class="no-tables-message">
+            <p>Không có bàn nào.</p>
+          </div>
+          <div class="table-grid">
+            <!-- Hiển thị danh sách bàn nếu có bàn chờ -->
+            <div class="table" *ngFor="let table of waitingTables" (click)="showTableDetails(table)">
+              {{ table?.lable }}<br>
+              <hr>
+              {{ table?.status === 0 ? 'Bàn trống' : (table?.status === 1 ? 'Đang sử dụng' : 'Không hoạt động') }}
+              <span class="icon-sl"><i class="fas fa-chair"></i>{{ table?.capacity }}</span>
+              <span class="icon-table" *ngIf="table?.status === 1">&#10004;</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal Hiển Thị Thông Tin Bàn -->
+<div class="modal fade" #tableDetailsModal id="tableDetailsModal" tabindex="-1"
+  aria-labelledby="tableDetailsModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tableDetailsModalLabel">Thông tin {{ tableDetail?.lable }}</h5>
+        <button type="button" class="btn-close" (click)="closeTableDetailsModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="tableDetail">
+        <div class="mb-3">
+          <label for="tableStatus" class="form-label">Trạng thái:</label>
+          <div>
+            <input type="radio" id="active" name="tableStatus" [(ngModel)]="tableStatus" [value]="1"
+              class="form-check-input d-inline-block">
+            <label for="active" class="d-inline-block ms-2">Đang hoạt động</label>
+
+            <input type="radio" id="inactive" name="tableStatus" [(ngModel)]="tableStatus" [value]="2"
+              class="form-check-input d-inline-block ms-4">
+            <label for="inactive" class="d-inline-block ms-2">Không hoạt động</label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="lable" class="form-label">Tên phòng/bàn</label>
+          <input type="text" class="form-control" id="lable1" [(ngModel)]="newTable" name="lable" required />
+          <div *ngIf="isTableNameInvalid" class="text-danger">Tên phòng/bàn không được để trống</div>
+        </div>
+        <div class="mb-3">
+          <label for="capacity" class="form-label">Số chỗ ngồi</label>
+          <input type="number" class="form-control" id="capacity" [(ngModel)]="capacity" name="capacity" min="1"
+            required (ngModelChange)="validateCapacity()" />
+          <!-- Hiển thị thông báo lỗi -->
+          <div *ngIf="capacityError" class="text-danger">{{ capacityError }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="floorSelect" class="form-label">Khu vực</label>
+          <div class="d-flex align-items-center">
+            <select class="form-select me-2" id="floorSelect" [(ngModel)]="selectedFloor" name="selectedFloor" required>
+              <option *ngFor="let floor of floors" [value]="floor">{{ floor }}</option>
+            </select>
+            <button type="button" class="btn btn-outline-secondary" (click)="openAddFloorModal()"
+              style="font-size: 18px; padding: 2px;">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div *ngIf="isFloorInvalid" class="text-danger">Chọn khu vực trước khi cập nhật</div>
+        </div>
+      </div>
+      <div *ngIf="messageUpdateValid" class="alert alert-danger">
+        {{ messageUpdateValid }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeTableDetailsModal()">Đóng</button>
+        <button type="button" class="btn btn-warning" (click)="editTable(tableDetail)">Lưu thay đổi</button>
+        <button type="button" class="btn btn-danger" (click)="deleteTable(tableDetail)">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Xác Nhận Xóa -->
+<div class="modal fade" #confirmDeleteModal id="confirmDeleteModal" tabindex="-1"
+  aria-labelledby="confirmDeleteModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa phòng/bàn</h5>
+        <button type="button" class="btn-close" (click)="closeConfirmDeleteModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa: {{ tableDetail?.lable }}? </p>
+        <p>Hành động này không thể hoàn tác!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmDeleteModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeleteTable()">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Xác Nhận Chỉnh Sửa -->
+<div class="modal fade" #confirmEditModal id="confirmEditModal" tabindex="-1" aria-labelledby="confirmEditModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmEditModalLabel">Xác nhận chỉnh sửa phòng/bàn</h5>
+        <button type="button" class="btn-close" (click)="closeConfirmEditModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn lưu thay đổi cho: {{ tableDetail?.lable }}?</p>
+        <p>Các thay đổi sẽ được cập nhật ngay lập tức!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmEditModal()">Hủy</button>
+        <button type="button" class="btn btn-warning" (click)="confirmEditTable(tableDetail)">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Dish Modal -->
+<div class="modal fade" #manageTablesModal id="manageTablesModal" tabindex="-1"
+  aria-labelledby="manageTablesModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageTablesModalLabel">Thêm phòng/bàn mới</h5>
+        <button type="button" class="btn-close" (click)="closeManageTablesModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="submitForm()">
+          <div class="mb-3">
+            <label for="lable2" class="form-label">Tên phòng/bàn</label>
+            <input type="text" class="form-control" id="lable2" [(ngModel)]="lableTable" name="lable"
+              placeholder="Nhập tên bàn" (ngModelChange)="checkTableName()" required>
+            <div *ngIf="!lableTable || lableTable.trim() === ''" class="text-danger">{{ message }}</div>
+            <!-- Hiển thị thông điệp nếu trống -->
+            <div *ngIf="isNameDuplicate && lableTable && lableTable.trim() !== ''" class="text-danger">{{ message }}
+            </div>
+            <!-- Hiển thị thông điệp nếu trùng lặp -->
+          </div>
+
+
+
+          <div class="mb-3">
+            <label for="floorSelect" class="form-label">Khu vực</label>
+            <div class="d-flex align-items-center">
+              <select class="form-select me-2" id="floorSelect" [(ngModel)]="selectedFloor" name="selectedFloor"
+                required>
+                <option *ngFor="let floor of floors" [value]="floor">{{ floor }}</option>
+              </select>
+              <button type="button" class="btn btn-outline-secondary" (click)="openAddFloorModal()"
+                style="font-size: 18px; padding: 2px;">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="capacity" class="form-label">Số chỗ ngồi</label>
+            <input type="number" class="form-control" id="capacity" [(ngModel)]="capacity" name="capacity" min="1"
+              required (ngModelChange)="validateCapacity()" />
+            <div *ngIf="capacityError" class="text-danger">{{ capacityError }}</div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeManageTablesModal()">Đóng</button>
+            <button type="submit" class="btn btn-primary">Tạo bàn</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Thêm Tầng Mới -->
+<div class="modal fade" #addFloorModal id="addFloorModal" tabindex="-1" aria-labelledby="addFloorModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addFloorModalLabel">Thêm khu vực mới</h5>
+        <button type="button" class="btn-close" (click)="closeAddFloorModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="submitNewFloor()">
+          <div class="mb-3">
+            <label for="newFloorNumber" class="form-label">Tên khu vực</label>
+            <input type="text" class="form-control" id="newFloorNumber" [(ngModel)]="newFloor" name="newFloor"
+              required>
+          </div>
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddFloorModal()">Đóng</button>
+            <button type="submit" class="btn btn-primary">Lưu khu vực</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Edit Floor Modal -->
+<div class="modal fade" #editFloorModal id="editFloorModal" tabindex="-1" aria-labelledby="editFloorModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editFloorModalLabel">Chỉnh sửa khu vực</h5>
+        <button type="button" class="btn-close" (click)="closeEditFloorModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="submitForm()">
+          <!-- Dropdown để chọn tầng hiện tại -->
+          <div class="mb-3">
+            <label for="floorInput" class="form-label">Khu vực hiện tại</label>
+            <input type="text" class="form-control" id="floorInput" [value]=" selectedFloor" readonly />
+          </div>
+
+
+          <!-- Dropdown để chọn tầng mới khi chỉnh sửa -->
+          <div class="mb-3" *ngIf="isEditing">
+            <label for="newFloorInput" class="form-label">Chọn khu vực thay đổi</label>
+            <select class="form-select" id="newFloorInput" [(ngModel)]="newSelectedFloor" name="newSelectedFloor"
+              required>
+              <option *ngFor="let floor of getAvailableFloors()" [value]="floor">{{ floor }}</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeEditFloorModal()">Đóng</button>
+            <button type="button" class="btn btn-primary" (click)="toggleEdit()">
+              {{ isEditing ? 'Lưu' : 'Chỉnh sửa' }}
+            </button>
+            <button type="button" class="btn btn-danger" (click)="deleteFloor()">Xóa khu vực</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- Modal Xác Nhận Xóa Tầng -->
+<div class="modal fade" #confirmDeleteFloorModal id="confirmDeleteFloorModal" tabindex="-1"
+  aria-labelledby="confirmDeleteFloorModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteFloorModalLabel">Xác nhận xóa khu vực</h5>
+        <button type="button" class="btn-close" (click)="closeConfirmDeleteFloorModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa: {{ selectedFloor }}? </p>
+        <p>Hành động này không thể hoàn tác!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmDeleteFloorModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeleteFloor()">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>

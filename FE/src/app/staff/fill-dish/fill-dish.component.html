@@ -1,0 +1,335 @@
+<div class="app">
+  <app-HeaderOrderStaff></app-HeaderOrderStaff>
+  <div class="app-body d-flex">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <app-SidebarOrder></app-SidebarOrder>
+    </nav>
+    <div class="app-body-main-content flex-fill">
+      <main class="main-content">
+        <div class="card fixed-size">
+          <div class="title">
+            <!-- <a href="javascript:history.back()" class="back-link">
+              <i class="fas fa-arrow-left back-icon"></i>
+            </a> -->
+            <button (click)="onButtonClick('dineIn')" [class.selected]="isSelected('dineIn')">Phục vụ tại chỗ</button>
+            <button (click)="onButtonClick('takeAway')" [class.selected]="isSelected('takeAway')">Đơn mang về</button>
+            <button (click)="onButtonClick('ship')" [class.selected]="isSelected('ship')">Đơn giao hàng</button>
+          </div>
+          <br>
+          <div class="card-body">
+            <!-- Nội dung cho dineIn -->
+            <div *ngIf="selectedButton === 'dineIn'">
+              <div class="upper-section">
+                <table *ngIf="filteredOrders.length > 0; else noContent">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Tên món</th>
+                      <th>Số lượng hoàn thành</th>
+                    </tr>
+                  </thead>
+                  <tbody class="scrollable-tbody">
+                    <ng-container *ngFor="let order of filteredOrders">
+                      <tr>
+                        <td>
+                          <input type="checkbox" (change)="onCheckboxChange(order, $event)"
+                            [checked]="order === selectedOrder">
+                        </td>
+                        <td>{{ order.itemNameOrComboName }}</td>
+                        <td>{{ order.dishesServed }}</td>
+                      </tr>
+                    </ng-container>
+                  </tbody>
+                </table>
+                <ng-template #noContent>
+                  <div>Không có món ăn hoàn thành</div>
+                </ng-template>
+              </div>
+              <div class="lower-section" *ngIf="orderDish">
+                <hr><br>
+                <h5>Danh sách bàn cần lên món:</h5>
+                <br>
+                <div class="grid-container">
+                  <div *ngFor="let dish of orderDish; let i = index" class="grid-item">
+                    <div class="dish-info">
+                      <p>{{ dish.tableLabel }} - {{ getOrderTimeHoursMinutes(dish.orderTime) }}</p>
+                      <p>Số lượng yêu cầu: {{ dish.quantityRequired }}</p>
+                      <div class="quantity-container">
+                        <p>Phục vụ</p>
+                        <input type="number" min="1" [attr.max]="dish.quantityRequired"
+                          [(ngModel)]="quantitiesServed[i]" (keypress)="preventNonNumericalInput($event)"
+                          (input)="validateInput($event, i, dish.quantityRequired)">
+                      </div>
+                      <button
+                        (click)="updateDishesServed(dish.orderDetailId, dish.itemName || dish.comboName); $event.stopPropagation()">Lên
+                        món</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nội dung cho takeAway -->
+            <div *ngIf="selectedButton === 'takeAway'">
+              <h5 *ngIf="takeawayOrders.length > 0; else noContent">Thông tin đơn mang về:</h5>
+              <div class="lower-section" *ngIf="takeawayOrders" style="height: 570px; overflow: auto;">
+                <div class="grid-container">
+                  <div *ngFor="let order of takeawayOrders; let i = index" class="grid-item">
+                    <div class="dish-info" (click)="showDetails(order)">
+                      <p>Đơn {{ order.orderId }} </p>
+                      <p>Tình trạng: {{ order.status === 1 ? "Hoàn thành" : "Chưa hoàn thành" }}</p>
+                      <button *ngIf="order.status === 1"
+                        (click)="handleButtonClick(order); $event.stopPropagation()">Trả đơn</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noContent>
+                <div>Không có đơn hàng hoàn thành</div>
+              </ng-template>
+            </div>
+
+            <!-- Nội dung cho ship -->
+            <div *ngIf="selectedButton === 'ship'">
+              <div class="upper-section">
+                <table *ngIf="deliveryOrders.length > 0; else noContent">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Mã đơn hàng</th>
+                      <th>Tình trạng</th>
+                      <th>Thời gian dự kiến nhận hàng</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody class="scrollable-tbody">
+                    <ng-container *ngFor="let order of deliveryOrders">
+                      <tr>
+                        <td *ngIf="order.status === 1">
+                          <input type="checkbox" (change)="onCheckBoxChange(order, $event)"
+                            [checked]="order === selectedOrders">
+                        </td>
+                        <td *ngIf="order.status !== 1"></td>
+                        <td>{{ order.orderId }}</td>
+                        <td>{{ order.status === 1 ? "Sẵn sàng giao" : "Chưa hoàn thành" }}</td>
+                        <td>{{ order.recevingOrder | date:'dd/MM/yyyy - HH:mm' }}</td>
+                        <td><button (click)="showDetails(order)">Chi tiết</button></td>
+                      </tr>
+                    </ng-container>
+                  </tbody>
+                </table>
+                <ng-template #noContent>
+                  <div>Không có đơn hàng hoàn thành</div>
+                </ng-template>
+              </div>
+              <div class="lower-section" *ngIf="selectedOrders.length > 0">
+                <hr><br>
+                <h5>Danh sách nhân viên ship:</h5>
+                <br>
+                <div class="grid-container">
+                  <div *ngFor="let shiper of dataShipStaff; let i = index" class="grid-item">
+                    <div class="dish-info">
+                      <p>{{ shiper.firstName }} {{ shiper.lastName }}</p>
+                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmationModal"
+                        (click)="GetAccountById(shiper.accountId)">Chỉ định giao hàng</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Popup for item details -->
+    <div *ngIf="selectedItem" class="popup" (click)="closePopup()">
+      <div class="popup-content" (click)="$event.stopPropagation()">
+        <span class="close" (click)="closePopup()">&times;</span>
+        <div class="details-container">
+          <h3>Đơn hàng: {{selectedItem.orderId}}</h3>
+          <p>Loại đơn: {{ selectedItem.orderType === 1 ? "Mang về" : "Giao hàng" }}</p>
+          <p>Tình trạng: {{selectedItem.status === 1 ? "Hoàn thành" : "Chưa hoàn thành"}}</p>
+          <p>Tên người nhận: {{selectedItem.consigneeName}}</p>
+          <p>Số điện thoại: {{selectedItem.guestPhone}}</p>
+          <p>Địa chỉ: {{selectedItem.guestAddress}}</p>
+          <p>Thời gian dự kiến nhận hàng: {{ selectedItem.recevingOrder | date:'dd/MM/yyyy - HH:mm' }}</p>
+
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Món ăn</th>
+                <th>Số lượng</th>
+                <th>Hoàn thành</th>
+                <th>Đơn giá</th>
+                <th>Tổng số tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let item of selectedItem.itemInOrderDetails">
+                <tr>
+                  <td>{{ item.nameCombo || item.itemName }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.dishesServed }}</td>
+                  <td>{{ item.itemPrice || item.comboPrice | currencyFormat }}</td>
+                  <td>{{ item.unitPrice | currencyFormat }}</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+          <div class="summary-section mt-4">
+            <div class="row">
+              <!-- First Column -->
+              <div class="col-md-6">
+                <div class="d-flex justify-content-between mb-2" *ngIf="selectedItem.discountPercent">
+                  <span class="fw-bold">Tạm tính:</span>
+                  <span>{{ selectedItem.totalAmount | currencyFormat }}</span>
+                </div>
+                <div *ngIf="selectedItem.discountPercent" class="d-flex justify-content-between mb-2">
+                  <span class="fw-bold">Giảm giá:</span>
+                  <span>{{ selectedItem.totalAmount - selectedItem.discountedPrice | currencyFormat }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="fw-bold">Tổng cộng:</span>
+                  <span>{{ selectedItem.discountedPrice | currencyFormat }}</span>
+                </div>
+              </div>
+
+              <!-- Payment Status Badges -->
+              <div class="col-md-6 d-flex align-items-center justify-content-end">
+                <div *ngIf="selectedItem.deposits > 0" class="badge bg-success ms-auto badge-circle">
+                  Đã thanh toán
+                </div>
+                <div *ngIf="selectedItem.deposits === 0" class="badge bg-danger ms-auto badge-circle">
+                  Chưa thanh toán
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmationModalLabel">Xác nhận</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Bạn có thể hiển thị thông tin về shipper tại đây -->
+            <p>Bạn có chắc chắn muốn chỉ định giao hàng cho <span class="shipper-name">{{accountShip?.firstName}}
+                {{accountShip?.lastName}}</span> ?</p>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#invoiceModal"
+              (click)="updateAccountId(accountShip.accountId)">Xác
+              nhận</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- order Modal -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="text-center mb-3">
+            <div class="d-flex justify-content-center align-items-center flex-column">
+              <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="green" class="bi bi-check-circle"
+                viewBox="0 0 16 16">
+                <path
+                  d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5.586l-3-3a.5.5 0 0 1 .707-.707L7 9.293l4.646-4.647a.5.5 0 0 1 .708.707l-5 5a.5.5 0 0 1-.708 0z" />
+              </svg>
+              <h4 class="mt-2">Chỉ định giao hàng thành công</h4>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div *ngFor="let order of selectedOrders; let i = index">
+              <div class="card1">
+                <div class="card-header d-flex justify-content-center">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                      [attr.data-bs-target]="'#orderDetails' + i" aria-expanded="false"
+                      [attr.aria-controls]="'orderDetails' + i">
+                      <span class="text-primary fw-bold">Đơn hàng: {{ order.orderId }} - Người nhận: {{
+                        order.consigneeName }}</span>
+                      <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                  </h5>
+                </div>
+
+
+
+                <div [id]="'orderDetails' + i" class="collapse collapse-item">
+                  <div class="card-body text-left">
+                    <p><strong>Tên người nhận:</strong> {{ order.consigneeName }}</p>
+                    <p><strong>Địa chỉ:</strong> {{ order.guestAddress }}</p>
+                    <p><strong>Số điện thoại:</strong> {{ order.guestPhone }}</p>
+                    <p><strong>Ngày nhận đơn:</strong> {{ order.recevingOrder | date:'dd/MM/yyyy HH:mm' }}</p>
+
+                    <!-- Table for item details -->
+                    <table class="table table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th>Tên món</th>
+                          <th>Số lượng</th>
+                          <th>Đơn giá</th>
+                          <th>Tổng tiền</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of order.itemInOrderDetails">
+                          <td>{{ item.itemName || item.comboName }}</td>
+                          <td>{{ item.quantity }}</td>
+                          <td>{{ item.itemPrice || item.comboPrice | currencyFormat }}</td>
+                          <td>{{ item.unitPrice | currencyFormat }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <p><strong>Tổng tiền hàng:</strong> {{ order.totalAmount | currencyFormat }}</p>
+                    <p><strong>Giảm giá:</strong> {{ (order.totalAmount * (order.discountPercent / 100)) |
+                      currencyFormat }} ({{ order.discountPercent }}%)</p>
+                    <hr>
+                    <p><strong>Khách phải trả:</strong>
+                      {{ (order.deposits > 0 ? 0 : order.totalAmount - (order.totalAmount * (order.discountPercent /
+                      100))) | currencyFormat }}
+                    </p>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 offset-md-6 d-flex align-items-center justify-content-end">
+                      <div *ngIf="order.deposits > 0" class="badge bg-success">
+                        Đã thanh toán
+                      </div>
+                      <div *ngIf="order.deposits === 0" class="badge bg-danger">
+                        Chưa thanh toán
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" *ngIf="isPrinted" (click)="reloadPage()">Đóng</button>
+            <button type="button" class="btn btn-primary" (click)="printOrder()">In đơn cho ship</button>
+          </div>
+        </div>
+      </div>
+    </div>

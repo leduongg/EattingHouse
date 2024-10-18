@@ -1,0 +1,275 @@
+/* purchaseOrder.component.css */
+
+/* Container div */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Set the height of the container to full viewport height */
+}
+
+/* Form */
+form {
+  border: 2px solid #ccc; /* Add border to the form */
+  border-radius: 5px; /* Add border radius for rounded corners */
+  padding: 20px; /* Add padding inside the form */
+  margin: 0 auto; /* Set margin to auto to center the form horizontally */
+  width: 350px; /* Set the width of the form */
+  margin-top: 150px;
+}
+
+/* Label */
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Input fields */
+input[type="tel"],
+input[type="text"] {
+  padding: 10px;
+  width: 100%; /* Set the width to 100% to fill the container */
+  margin-bottom: 10px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Button */
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Button hover */
+button:hover {
+  background-color: #45a049;
+}
+.button-container {
+  justify-content: space-between; /* Canh giữa các button và căn khoảng trống giữa chúng */
+}
+
+/* Thiết lập CSS cho button "Back" */
+.back-button {
+  background: #4CAF50; /* Xóa nền của button */
+  border: none; /* Xóa border của button */
+  cursor: pointer; /* Đổi con trỏ chuột thành pointer khi di chuột vào button */
+}
+
+/* Thiết lập CSS cho button "Verify" */
+.verify-button {
+  padding: 10px 20px; /* Thiết lập padding cho button */
+  background-color: #4CAF50; /* Màu nền cho button "Verify" */
+  color: white; /* Màu chữ cho button "Verify" */
+  border: none; /* Xóa border của button */
+  cursor: pointer; /* Đổi con trỏ chuột thành pointer khi di chuột vào button */
+}
+
+.phone-form {
+  text-align: center; /* Canh giữa nội dung trong form */
+  margin-top: 150px;
+}
+
+/* Thiết lập CSS cho button container */
+.button-container {
+  margin-top: 10px; /* Khoảng cách giữa input và button */
+}
+
+
+.tab-buttons {
+  position: sticky;
+  top: 80px;
+  width: 70%; /* Chiều rộng */
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between; /* Căn các button cạnh nhau mà không có khoảng trống giữa */
+  background-color: white; /* Màu nền của container button */
+  padding: 10px; /* Khoảng cách nội bộ của container button */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+  z-index: 1000; /* Đảm bảo các button luôn nằm trên các nội dung khác */
+}
+
+.tab-buttons button {
+  background-color: rgb(179, 183, 161); /* Màu nền mặc định của các button */
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.tab-buttons button.active {
+  background-color: rgb(94, 206, 122); /* Màu nền khi button được chọn */
+  color: white; /* Màu chữ khi button được chọn */
+}
+
+
+.tab-content {
+  margin-top: 10px;
+}
+
+.card {
+  border-width: 1px; /* Đặt độ dày viền là 1px */
+  border-style: solid; /* Loại viền là solid (viền thẳng) */
+  border-color: #ddd; /* Màu viền */
+  border-radius: 5px; /* Góc bo tròn viền */
+  padding: 20px; /* Khoảng đệm bên trong thẻ card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+  background-color: #f9f9f9; /* Màu nền */
+  width: 70%; /* Chiều rộng */
+  margin: 0 auto; /* Căn giữa theo chiều ngang */
+  max-width: 800px; /* Chiều rộng tối đa */
+}
+
+
+.order-status {
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.return-policy {
+  font-size: 12px;
+}
+
+
+.order-header {
+  padding-bottom: 10px;
+}
+
+.order-footer {
+  padding-top: 10px;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.total-price {
+  font-weight: bold;
+  color: #333;
+  margin-right: 10px;
+}
+.alert {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  color: #856404; /* Màu chữ */
+  background-color: #fff3cd; /* Màu nền */
+  border: 1px solid #ffeeba; /* Đường viền */
+}
+
+.info {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.info .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+.info .col-4 {
+  padding: 0 10px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+}
+
+.info strong {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+@media (max-width: 767px) {
+  .info .col-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+.col-7 {
+  display: flex;
+  flex-direction: column; /* Chuyển thành cột */
+  align-items: flex-start; /* Căn trái các phần tử */
+}
+
+.dish-name {
+  font-weight: bold; /* Bôi đậm tên món ăn */
+}
+
+.quantity {
+  margin-top: 4px; /* Khoảng cách giữa tên món ăn và số lượng */
+  color: gray; /* Màu sắc cho số lượng */
+}
+
+.col-3{
+  display: flex;
+  align-items: center;
+}
+
+.btn-danger {
+  background-color: red; /* Màu nền đỏ */
+  color: white; /* Màu chữ trắng */
+}
+/* Style for the title */
+.detail p {
+  font-size: 24px;         /* Increase the font size */
+  font-weight: bold;       /* Make the text bold */
+  color: #333;             /* Change the text color */
+  text-align: center;      /* Center the text */
+  margin: 20px 0;          /* Add margin to the top and bottom */
+}
+
+/* Optional additional styles */
+.detail p::before {
+  content: "🛒 ";          /* Add an icon before the title (optional) */
+}
+.no-orders-message {
+  text-align: center;
+  margin: 20px auto;
+  height: 600px;
+  width: 1000px;
+  border: 2px dashed #ccc;  /* Khung với đường viền gạch ngang (dashed) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;  /* Màu nền nhẹ để làm nổi bật */
+  border-radius: 10px;  /* Bo tròn các góc */
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Icon styling */
+.no-orders-icon {
+  font-size: 60px;
+  color: #ff6347; /* Màu sắc cho icon */
+  margin-bottom: 10px;
+  animation: bounce 2s infinite; /* Thêm hiệu ứng nhảy (bounce) cho icon */
+}
+
+/* Fade-in effect */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Bounce effect for the icon */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}

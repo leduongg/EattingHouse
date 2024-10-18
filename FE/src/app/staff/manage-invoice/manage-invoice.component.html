@@ -1,0 +1,340 @@
+<div class="app">
+  <app-HeaderOrderStaff></app-HeaderOrderStaff>
+  <div class="app-body">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="padding: 12px;"
+      *ngIf="account?.role === 'Cashier'">
+      <app-SidebarOrder></app-SidebarOrder>
+    </nav>
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light collapse" *ngIf="account?.role === 'Manager'">
+      <app-SideBar></app-SideBar>
+    </nav>
+    <div class="app-body-main-content">
+      <section class="service-section" *ngIf="role==3">
+        <br><br>
+        <div *ngIf="selectedTab === 'overview'" class="overview-section">
+          <div class="date-filters">
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateFrom">Từ ngày</label>
+                <input type="date" id="dateFrom" class="form-control" [(ngModel)]="dateFrom" [max]="dateTo"
+                  (change)="onDateFromChange()">
+              </div>
+            </div>
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateTo">Đến ngày</label>
+                <input type="date" id="dateTo" class="form-control" [(ngModel)]="dateTo" [max]="dateNow"
+                  (change)="onDateToChange()">
+              </div>
+            </div>
+          </div>
+          <div class="tiles">
+            <article class="tile">
+              <div class="tile-header">
+                <i class="ph-lightning-light"></i>
+                <h3>
+                  <span>Số đơn hoàn thành</span>
+                  <hr>
+                  <span>{{data[0]?.totalOrders}}</span>
+                </h3>
+              </div>
+            </article>
+            <article class="tile">
+              <div class="tile-header">
+                <i class="ph-fire-simple-light"></i>
+                <h3>
+                  <span>Doanh thu</span>
+                  <hr>
+                  <span>{{data[0]?.totalRevenue | currencyFormat }}</span>
+                </h3>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <section class="payment-section">
+          <h2>Phương thức thanh toán</h2>
+          <br>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="payments">
+                <div class="payment">
+                  <div class="payment-details">
+                    <p>Tiền mặt: ({{data[0]?.orderCountByPaymentMethod0+data[0]?.orderCountByPaymentMethod2}}) đơn</p>
+                    <div>
+                      <span>{{(data[0]?.revenueByPaymentMethod0+data[0]?.revenueByPaymentMethod2) | currencyFormat }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="payment">
+                  <div class="payment-details">
+                    <p>Chuyển khoản: ({{data[0]?.orderCountByPaymentMethod1}}) đơn</p>
+                    <div>
+                      <span>{{(data[0]?.revenueByPaymentMethod1) | currencyFormat }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="payment-section-footer">
+            <button class="save-button" (click)="exportData()">
+              Xuất file báo cáo
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <section class="service-section" *ngIf="!showDetailsCashier && role!==3">
+        <br><br>
+        <div *ngIf="selectedTab === 'overview'" class="overview-section">
+          <div class="date-filters">
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateFrom">Từ ngày</label>
+                <input type="date" id="dateFrom" class="form-control" [(ngModel)]="dateFrom" [max]="dateTo"
+                  (change)="onDateFromChange()">
+              </div>
+            </div>
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateTo">Đến ngày</label>
+                <input type="date" id="dateTo" class="form-control" [(ngModel)]="dateTo" [max]="dateNow"
+                  (change)="onDateToChange()">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <section class="payment-section">
+          <h2>Phương thức thanh toán</h2>
+          <br>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="payments">
+                <div class="payment">
+                  <div class="payment-details">
+                    <p>Tiền mặt: </p>
+                    <div>
+                      <span>{{totalPaymentOnline| currencyFormat }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="payment">
+                  <div class="payment-details">
+                    <p>Tiền chuyển khoản: </p>
+                    <div>
+                      <span>{{totalPaymentOnline | currencyFormat }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+        </section>
+        <hr> -->
+        <section class="payment-section">
+          <h2>Danh sách thu ngân và dòng tiền</h2>
+          <br>
+          <div class="row">
+            <table id="cashier-table">
+              <thead>
+                <tr>
+                  <th>Nhân viên</th>
+                  <th>Số đơn đã thu tiền</th>
+                  <th>Số đơn đã hoàn tiền</th>
+                  <th>Doanh thu</th>
+                  <th>Số tiền đã hoàn trả</th>
+                  <th>Số tiền cần nộp lại</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cashier-table-body">
+                <ng-container *ngFor="let item of report">
+                  <tr>
+                    <td>{{ item.firstName }} {{ item.lastName }}</td>
+                    <td>{{ item.completedOrderCount }}</td>
+                    <td>{{ item.refundOrderCount }}</td>
+                    <td>{{ item.revenue | currencyFormat }}</td>
+                    <td>{{ item.totalRefunds | currencyFormat }}</td>
+                    <td>{{ item.totalCashToSubmit | currencyFormat }}</td>
+                    <td *ngIf="item.revenue||item.totalRefunds"><button (click)="showDetailCashier(item.cashierId)">Chi
+                        tiết</button></td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+          <br>
+          <!-- <div class="payment-section-footer">
+            <button class="save-button" (click)="exportData()">
+              Xuất file báo cáo
+            </button>
+          </div> -->
+        </section>
+      </section>
+
+      <section class="service-section" *ngIf="showDetailsCashier">
+        <br><br>
+        <div *ngIf="selectedTab === 'overview'" class="overview-section">
+          <div class="date-filters">
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateFrom">Từ ngày</label>
+                <input type="date" id="dateFrom" class="form-control" [(ngModel)]="dateFrom" [max]="dateTo"
+                  (change)="onDateFromChange()">
+              </div>
+            </div>
+            <div class="date-filter" style="max-width: 250px;">
+              <div class="input-group">
+                <label class="input-group-text" for="dateTo">Đến ngày</label>
+                <input type="date" id="dateTo" class="form-control" [(ngModel)]="dateTo" [max]="dateNow"
+                  (change)="onDateToChange()">
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <section class="payment-section">
+          <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+            <a (click)="goBack()" class="back-link" style="position: absolute; left: 0;">
+              <i class="fas fa-arrow-left back-icon"></i>
+            </a>
+            <h2>Đơn hàng nhân viên xử lý</h2>
+          </div>
+
+
+          <br>
+          <div class="row">
+            <table id="cashier-table">
+              <thead>
+                <tr>
+                  <th>Mã đơn hàng</th>
+                  <th>Trạng thái đơn hàng</th>
+                  <th>Ngày đặt hàng</th>
+                  <th>Tổng tiền</th>
+                  <th></th>
+                  <!-- <th>Tình trạng</th> -->
+                </tr>
+              </thead>
+              <tbody id="cashier-table-body">
+                <ng-container *ngFor="let items of report">
+                  <tr *ngFor="let item of items.listOrder">
+                    <td>{{ item.orderId}}</td>
+                    <td>{{ item.status === 8?'Đã hoàn tiền':'Đã hoàn thành' }}</td>
+                    <td>{{ item.orderDate | date:'dd/MM/yyyy - HH:mm' }}</td>
+                    <td>{{ item.totalAmount | currencyFormat }}</td>
+                    <td><button class="action-button view-button" (click)="showDetails(item.orderId)">
+                        <i class="fas fa-eye"></i>
+                      </button></td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- Popup for item details -->
+      <div *ngIf="selectedItem" class="popup" (click)="closePopup()">
+        <div class="popup-content" (click)="$event.stopPropagation()">
+          <span class="close" (click)="closePopup()">&times;</span>
+          <div class="details-container">
+            <h3>Đơn hàng: {{selectedItem.orderId}}</h3>
+            <p>Loại đơn: {{
+              selectedItem.type === 1 ? "Mang về" :
+              selectedItem.type === 4 ? "Tại chỗ" :
+              selectedItem.type === 3 ? "Đặt bàn" :
+              selectedItem.type === 2 ? "Giao hàng" :
+              "Loại đơn không xác định"
+              }}</p>
+            <p>Tình trạng:
+              {{
+              selectedItem.status === 4 ? "Hoàn thành" :
+              selectedItem.status === 5 ? "Đã hủy" :
+              selectedItem.status === 8 ? "Đã hoàn tiền" :
+              "Chưa xác định"
+              }}
+            </p>
+
+            <p>Tên người nhận: {{selectedItem.consigneeName}}</p>
+            <p>Số điện thoại: {{selectedItem.guestPhone}}</p>
+            <p *ngIf="selectedItem.guestAddress">Địa chỉ: {{selectedItem.guestAddress}}</p>
+            <p *ngIf="selectedItem.status===7">Thời gian dự kiến nhận hàng: {{ selectedItem.recevingOrder |
+              date:'dd/MM/yyyy - HH:mm' }}</p>
+            <p *ngIf="selectedItem.status===4">Thời gian nhận hàng: {{ selectedItem.recevingOrder |
+              date:'dd/MM/yyyy -
+              HH:mm' }}</p>
+            <p *ngIf="selectedItem.status===5||selectedItem.status===8">Thời gian hủy đơn: {{ selectedItem.cancelDate
+              | date:'dd/MM/yyyy
+              -
+              HH:mm' }}</p>
+              <p *ngIf="selectedItem.status===5||selectedItem.status===8">Lý do hủy: {{ selectedItem.cancelationReason}}</p>
+            <p *ngIf="selectedItem.status===8">Thời gian hoàn tiền: {{ selectedItem.refundDate | date:'dd/MM/yyyy
+              -
+              HH:mm' }}</p>
+
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Món ăn</th>
+                  <th>Số lượng</th>
+                  <th>Hoàn thành</th>
+                  <th>Tổng số tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let item of selectedItem.orderDetails">
+                  <tr>
+                    <td>{{ item.nameCombo || item.itemName }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.dishesServed }}</td>
+                    <td>{{ item.unitPrice | currencyFormat }}</td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+            <div class="summary-section mt-4">
+              <div class="row">
+                <!-- First Column -->
+                <div class="col-md-6">
+                  <div class="d-flex justify-content-between" *ngIf="selectedItem.discountPercent">
+                    <span class="fw-bold">Tạm tính:</span>
+                    <span>{{ selectedItem.totalAmount | currencyFormat }}</span>
+                  </div>
+                  <div *ngIf="selectedItem.discountPercent" class="d-flex justify-content-between">
+                    <span class="fw-bold">Giảm giá:</span>
+                    <span>{{ selectedItem.totalAmount*selectedItem.discountPercent/100 | currencyFormat }}</span>
+                  </div>
+                  <hr>
+                  <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Tổng cộng:</span>
+                    <span>{{ selectedItem.totalAmount - (selectedItem.totalAmount*selectedItem.discountPercent/100) |
+                      currencyFormat }}</span>
+                  </div>
+                </div>
+                <!-- Row for the payment status badge -->
+                <div class="col-md-2"></div>
+                <div class="col-md-3">
+                  <div class="col-md-6 offset-md-6 d-flex align-items-center justify-content-end">
+                    <div *ngIf="selectedItem.status===4" class="badge bg-success"
+                      style="font-size: 18px;">
+                      Đã thanh toán
+                    </div>
+                    <div *ngIf="selectedItem.status === 8" class="badge bg-success" style="font-size: 18px;">
+                      Đã hoàn tiền
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

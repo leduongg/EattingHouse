@@ -1,0 +1,392 @@
+<div class="card">
+  <div class="row">
+    <div class="col-md-8 cart">
+      <div>
+        <div class="cart-container">
+          <div class="cart-header">
+            <!-- Đây là vị trí của tiêu đề Quantity -->
+            <div class="row">
+              <div class="col-2"></div>
+              <div class="col">
+                <h5><b>Đồ ăn</b></h5>
+              </div>
+              <div class="col">
+                <h5><b>Đơn giá</b></h5>
+              </div>
+              <div class="col">
+                <h5><b>Số lượng</b></h5>
+              </div>
+              <div class="col">
+                <h5><b>Tổng tiền</b></h5>
+              </div>
+            </div>
+          </div>
+          <div class="cart-items">
+            <div class="row border-top border-bottom" *ngFor="let item of cartItems">
+              <div class="row main align-items-center">
+                <div class="col-2">
+                  <img class="img-fluid" [src]="item.imageUrl" alt="Item Image" style="max-width: 100%; height: 56px;">
+                </div>
+                <div class="col" style="font-size: 18px;">
+                  <div>{{ item.itemName || item.nameCombo }}</div>
+                </div>
+                <div class="col">
+                  <div>{{ item.discountedPrice || item.price | currencyFormat}}</div>
+                </div>
+                <div class="col">
+                  <span>{{ item.quantity }}</span>
+                </div>
+                <div class="col price-close" style="align-items:center;">
+                  <span class="price">{{ getTotalPrice(item) | currencyFormat}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="col-12 panel-footer basket-footer">
+        <div class="row">
+          <div class="col-12 text-right">
+            <div class="dive" *ngIf="selectedService === 'service1'">Khuyến mãi: <span class="very emphasized">{{
+                getDiscountAmount() | currencyFormat }}</span></div>
+          </div>
+        </div>
+        <hr *ngIf="selectedService === 'service1'">
+        <div class="row">
+          <div class="col-12 text-right">
+            <div class="dive">Tổng hóa đơn: <span class="very emphasized">{{ getTotalCartPrice() |
+                currencyFormat}}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="back-to-shop">
+        <div style="font-size: 18px;font-weight: bold; cursor: pointer;" routerLink="/menu" routerLinkActive="active">
+          <a><i class="fas fa-arrow-left"></i></a>
+          <span class="text-muted">Về thực đơn</span>
+        </div>
+      </div>
+      <div *ngIf="messages.length > 0" class="alert alert-warning">
+        <div *ngFor="let msg of messages">
+          {{ msg }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 summary">
+      <div>
+        <h5><b>Thông tin khách hàng</b></h5>
+      </div>
+      <hr>
+      <form #myForm="ngForm" (ngSubmit)="submitForm()">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="name">Họ tên<span class="required">*</span></label>
+              <input id="name" name="consigneeName" class="form-control form-control-sm" placeholder="Điền tên của bạn"
+                required [(ngModel)]="consigneeName" #consigneeNameField="ngModel">
+              <div *ngIf="consigneeNameField.invalid && (consigneeNameField.dirty || consigneeNameField.touched)"
+                class="text-danger">
+                <small class="text-danger">Vui lòng nhập tên !</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="phone">Số điện thoại<span class="required">*</span></label>
+              <input id="phone1" name="guestPhone" class="form-control form-control-sm" placeholder="Điền số điện thoại"
+                required [(ngModel)]="guestPhone" required pattern="^0\d{9,10}$" #phone="ngModel">
+              <div *ngIf="phone.invalid && (phone.dirty || phone.touched )">
+                <small class="text-danger" *ngIf="phone.errors?.['pattern']">
+                  Số điện thoại phải có 10 hoặc 11 chữ số!
+                </small>
+                <small class="text-danger" *ngIf="phone.errors?.['required'] && !phone.errors?.['pattern']">
+                  Vui lòng nhập số điện thoại!
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group" *ngIf="selectedService === 'service1'">
+              <label *ngIf="selectedService === 'service1'" for="address">Địa chỉ nhận hàng<span
+                  class="required">*</span></label>
+              <input id="address1" name="address" class="form-control form-control-sm"
+                placeholder="Điền địa chỉ của bạn" required [(ngModel)]="address" #addressField="ngModel">
+              <div
+                *ngIf="addressField.invalid && (addressField.dirty || addressField.touched) && selectedService === 'service1'"
+                class="text-danger">
+                <small class="text-danger">Vui lòng nhập địa chỉ!</small>
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="selectedService === 'service2'">
+              <label *ngIf="selectedService === 'service2'" for="address">Địa chỉ của bạn</label>
+              <input id="address2" name="address" class="form-control form-control-sm"
+                placeholder="Điền địa chỉ của bạn" [(ngModel)]="address">
+            </div>
+            <div class="form-group">
+              <label for="email">Email<span class="required">*</span></label>
+              <input type="text" id="email1" name="email" class="form-control form-control-sm"
+                placeholder="Nhập email của bạn" [(ngModel)]="emailGuest" required email
+                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" #email="ngModel">
+
+              <div *ngIf="email.invalid && (email.dirty || email.touched)">
+                <small class="text-danger" *ngIf="email.errors?.['required']">
+                  Vui lòng nhập địa chỉ email!
+                </small>
+                <small class="text-danger" *ngIf="email.errors?.['pattern']">
+                  Địa chỉ email không hợp lệ!
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="service">Dịch vụ</label>
+            <select id="service" name="service" class="form-control form-control-sv custom-select"
+              [(ngModel)]="selectedService">
+              <option value="service1">Đặt hàng</option>
+              <!-- <option value="service2">Đặt bàn</option> -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="order-time" *ngIf="selectedService === 'service1'">Thời gian nhận hàng</label>
+            <label for="order-time" *ngIf="selectedService === 'service2'">Thời gian đặt bàn<span
+                class="required">*</span></label>
+            <div class="input-group" *ngIf="selectedService === 'service1'">
+              <input id="order-time" name="orderTime" class="form-control form-control-sm" [(ngModel)]="orderTime"
+                [readonly]="!isEditing">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary btn-sm" style="background-color: #ddd;" type="button"
+                  (click)="toggleEdit()">
+                  Thay đổi
+                </button>
+              </div>
+            </div>
+            <div class="input-group" *ngIf="selectedService === 'service2'">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input id="date" type="date" name="date" class="form-control form-control-sm" [(ngModel)]="date"
+                    (change)="isEarliest = false" [min]="minDate" [max]="maxDate" (change)="updateTimes()"
+                    style="height: 41px;width: 180px;">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <select id="time" name="time" class="form-control form-control-sm"
+                    style="height: 41px;width: 180px;margin-left: 12px;" [(ngModel)]="time" required #times="ngModel">
+                    <option value="" selected>Chọn</option>
+                    <option *ngFor="let time of availableHours" [value]="time">{{ time }}</option>
+                  </select>
+                  <div *ngIf="availableHours.length<1">
+                    <small class="text-danger" style="margin-left: 12px;">Đã hết giờ đặt bàn ngày hôm nay!</small>
+                  </div>
+                  <div *ngIf="times.invalid && (times.dirty || times.touched)">
+                    <small class="text-danger" style="margin-left: 12px;">Vui lòng chọn giờ ăn!</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="selectedService === 'service2'">
+            <div class="form-group">
+              <label for="people">Số lượng khách<span class="required">*</span></label>
+              <input id="people" name="people" class="form-control form-control-sm" placeholder="Điền số lượng khách"
+                required [(ngModel)]="people" #peopleInput="ngModel" pattern="[0-9]*">
+              <div *ngIf="peopleInput.invalid && (peopleInput.dirty || peopleInput.touched)">
+                <small class="text-danger" *ngIf="peopleInput.errors?.['required']">
+                  Vui lòng nhập số lượng khách!
+                </small>
+                <small class="text-danger" *ngIf="peopleInput.errors?.['pattern']">
+                  Số lượng khách chỉ được nhập số!
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="note">Ghi chú</label>
+            <textarea id="note" name="note" class="form-control form-control-lg" placeholder="Điền ghi chú (nếu có)"
+              [(ngModel)]="note"></textarea>
+          </div>
+
+          <div class="form-group" *ngIf="selectedService === 'service1'">
+            <span style="margin-right: 10px;">Khuyến mãi</span>
+            <i class="fas fa-tags me-2" (click)="openDiscountModal()" style="cursor: pointer;"></i>
+            <div>
+              <span *ngIf="selectedDiscountDetails" class="selected-discount" (click)="openDiscountModal()">
+                {{ selectedDiscountDetails.discountName }} - Giảm {{ selectedDiscountDetails.discountPercent |
+                percentage }}
+              </span>
+              <span *ngIf="!selectedDiscountDetails" class="selected-discount" (click)="openDiscountModal()">
+                Chọn khuyến mãi
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <hr>
+        <div class="row" *ngIf="selectedService === 'service1'">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="payment-method">Phương thức thanh toán:</label>
+              <div>
+                <label class="radio-label">
+                  <input type="radio" name="paymentMethod" value="delivery" [(ngModel)]="selectedPaymentMethod"
+                    (change)="onPaymentMethodChange($event)" checked>
+                  <span class="radio-text">Thanh toán khi giao hàng</span>
+                </label>
+              </div>
+              <div>
+                <label class="radio-label">
+                  <input type="radio" name="paymentMethod" value="banking" [(ngModel)]="selectedPaymentMethod"
+                    (change)="onPaymentMethodChange($event)">
+                  <span class="radio-text">Chuyển khoản qua ngân hàng</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <button type="submit" class="btn btn-primary" [disabled]="myForm.invalid" style="font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;" *ngIf="selectedService === 'service1'">Đặt Hàng</button>
+            <button type="submit" class="btn btn-primary" [disabled]="myForm.invalid" style="font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;" *ngIf="selectedService === 'service2'">Đặt Bàn</button>
+          </div>
+          <p class="note" *ngIf="selectedService === 'service2'">
+            LƯU Ý: Quý khách cần thanh toán 50% tổng hóa đơn. Bấm đặt bàn để đến trang thanh toán.
+
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="updateTimeModal" tabindex="-1" role="dialog" aria-labelledby="updateTimeModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateTimeModalLabel">Chọn thời gian</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="hideModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="date">Ngày nhận</label>
+              <input id="date" type="date" name="date" class="form-control form-control-sm" [(ngModel)]="date"
+                (change)="isEarliest = false" [min]="minDate" [max]="maxDate" (change)="updateTimes()">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="time">Giờ nhận</label>
+              <select id="time" name="time" class="form-control form-control-sm" style="height: 41px;"
+                [(ngModel)]="time" (change)="isEarliest = false">
+                <option value="">Chọn</option>
+                <option *ngFor="let time of availableHours" [value]="time">{{ time }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="checkbox-label-container">
+        <input type="checkbox" id="earliestCheckbox" [(ngModel)]="isEarliest" class="form-check-input"
+          (change)="onEarliestChange()">
+        <label for="earliestCheckbox" class="form-check-label">Giao hàng sớm nhất</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" style="background-color: red;" class="btn btn-secondary"
+          (click)="hideModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="saveTime()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal giảm giá -->
+<div class="modal-discount fade" id="discountModal" tabindex="-1" role="dialog" aria-labelledby="discountModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog-discount" role="document">
+    <div class="modal-content-discount">
+      <div class="modal-header-discount">
+        <h5 class="modal-title-discount" id="discountModalLabel">Chọn mã giảm giá</h5>
+        <span class="close-discount" (click)="closeDishModal()">&times;</span>
+        <div *ngIf="discount && discount.length > 0">
+          <span>Bạn có thể chọn 1 mã khuyến mại cho đơn hàng</span>
+        </div>
+      </div>
+      <br>
+      <div class="modal-body-discount">
+        <ul class="list-group">
+          <li *ngFor="let discounts of discount" class="list-group-item list-group-item-action">
+            <label class="d-flex align-items-center w-100">
+              <input type="radio" name="selectedDiscount" [value]="discounts.discountId"
+                [checked]="selectedDiscount === discounts.discountId" (click)="onDiscountSelect(discounts.discountId)"
+                class="me-2" style="width: 20px; max-width: 20px;" />
+              <div class="discount-details">
+                <div class="discount-left">
+                  {{ discounts.discountName }}
+                </div>
+                <div class="discount-right">
+                  Giảm {{ discounts.discountPercent | percentage }} cho đơn hàng
+                  <span *ngIf="discounts.totalMoney > 0" class="discount-info">
+                    (Đơn tối thiểu {{ discounts.totalMoney | currencyFormat }})
+                  </span>
+                  <span *ngIf="discounts.quantityLimit > 0" class="discount-info">
+                    (Còn lại: {{ discounts.quantityLimit - discounts.usedCount}} mã giảm giá)
+                  </span>
+                  <span *ngIf="discounts.totalMoney > 0" class="discount-info">
+                    (Hạn sử dụng {{ discounts.endTime | date:'dd/MM/yyyy' }})
+                  </span>
+                </div>
+              </div>
+            </label>
+          </li>
+          <li *ngFor="let discounts of discountInvalid"
+            class="list-group-item list-group-item-action disabled-discount">
+            <label class="d-flex align-items-center w-100">
+              <input type="radio" name="selectedDiscount" [value]="discounts.discountId" disabled class="me-2"
+                style="width: 20px; max-width: 20px;" />
+              <div class="discount-details">
+                <div class="discount-left">
+                  {{ discounts.discountName }}
+                </div>
+                <div class="discount-right">
+                  Giảm {{ discounts.discountPercent | percentage }} cho đơn hàng
+                  <span *ngIf="discounts.totalMoney > 0" class="discount-info">
+                    (Đơn tối thiểu {{ discounts.totalMoney | currencyFormat }})
+                  </span>
+                  <span *ngIf="discounts.quantityLimit > 0" class="discount-info">
+                    (Còn lại: {{ discounts.quantityLimit - discounts.usedCount}} mã giảm giá)
+                  </span>
+                  <span *ngIf="discounts.totalMoney > 0" class="discount-info">
+                    (Hạn sử dụng: Từ {{ discounts.startTime | date:'dd/MM/yyyy' }} đến {{ discounts.endTime |
+                    date:'dd/MM/yyyy' }})
+                  </span>
+                </div>
+              </div>
+            </label>
+          </li>
+        </ul>
+        <div *ngIf="discount && discount.length < 1 && discountInvalid.length <1">
+          <span>Không có mã khuyến mại</span>
+        </div>
+      </div>
+
+      <div class="modal-footer-discount">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeDishModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="saveDiscount()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>

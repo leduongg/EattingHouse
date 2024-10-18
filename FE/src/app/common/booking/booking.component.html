@@ -1,0 +1,179 @@
+<div class="dish">
+  <table class="cart" *ngIf="cartItems && cartItems.length > 0; else noItems">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Món ăn</th>
+        <th>Giá bán</th>
+        <th>Số lượng</th>
+        <th>Thành tiền</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let item of cartItems">
+      <tr>
+        <td><img class="img-fluid" [src]="item.imageUrl" alt="Item Image" style="max-width: 100%; height: 56px;"></td>
+        <td>{{ item.itemName||item.nameCombo }}</td>
+        <td>{{ item.discountedPrice || item.price | currencyFormat}} </td>
+        <td>
+          <a (click)="decreaseQuantity(item)" class="icon" style="cursor: pointer;">
+            <i class="fas fa-minus" style="color: black; font-size: 10px;"></i>
+          </a>
+          <input type="number" [(ngModel)]="item.quantity" class="quantity-input" [min]="1" [max]="maxValue"
+                      (input)="validateInput(item, maxValue)" (keydown)="preventDelete($event, item.quantity)"
+                      pattern="[0-9]*" inputmode="numeric" style="appearance: none; -moz-appearance: textfield;"
+                      required />
+          <a (click)="increaseQuantity(item)" class="icon" style="cursor: pointer;">
+            <i class="fas fa-plus" style="color: black; font-size: 10px;"></i>
+          </a>
+        </td>
+        <td><span class="price"> {{ getTotalPrice(item) | currencyFormat}}</span></td>
+        <td><button class="delete icon-button" (click)="removeItem(item)">🗑️</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="summary" *ngIf="cartItems && cartItems.length > 0;">
+  <div class="summary-content">
+    <a (click)="openMenuPopup()"><i class="fas fa-arrow-left"></i>Tiếp tục chọn món</a>
+    <p>Tổng cộng: <span id="total">{{ getTotalCartPrice() | currencyFormat }} </span></p>
+  </div>
+</div>
+
+<ng-template #noItems>
+  <div class="empty-cart">
+    <div class="content">
+      <p class="center-text">Quý khách có muốn chọn món ngay không?</p>
+      <div class="right-content" (click)="openMenuPopup()">
+        <a><i class="fas fa-plus-circle icon"></i></a>
+        <p>Đặt trước món</p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Modal -->
+<div id="menuModal" class="modal" [ngClass]="{'show': isMenuPopupOpen}">
+  <div class="modal-dialog" role="document"></div>
+  <div class="modal-content">
+    <span class="close" (click)="closeMenuPopup()">&times;</span>
+    <app-menu [isReser]="true"  [modalTitle]="'Custom Menu Title'"></app-menu> <!-- Pass the value here -->
+  </div>
+</div>
+
+
+<div class="reservation-form" style="max-height: 500px;">
+  <h2>Đặt Bàn</h2>
+  <form #reservationForm="ngForm" (ngSubmit)="submitForm(reservationForm)">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Tên người đặt <span style="color: red;">*</span>
+          </label>
+          <input type="text" id="name" name="consigneeName" placeholder="Nhập tên" [(ngModel)]="consigneeName" required
+            #name="ngModel">
+          <div *ngIf="name.invalid && (name.dirty || name.touched || formSubmitted)">
+            <small class="text-danger">Vui lòng nhập Tên quý khách!</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Số điện thoại <span style="color: red;">*</span>
+          </label>
+          <input type="tel" id="phone" name="guestPhone" placeholder="Nhập số điện thoại" [(ngModel)]="guestPhone"
+            required pattern="^0\d{9,10}$" #phone="ngModel">
+          <div *ngIf="phone.invalid && (phone.dirty || phone.touched || formSubmitted)">
+            <small class="text-danger" *ngIf="phone.errors?.['pattern']">
+              Số điện thoại phải có 10 hoặc 11 chữ số!
+            </small>
+            <small class="text-danger" *ngIf="phone.errors?.['required'] && !phone.errors?.['pattern']">
+              Vui lòng nhập số điện thoại!
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Email <span style="color: red;">*</span>
+          </label>
+          <input type="text" id="email" name="email" placeholder="Nhập email của bạn" [(ngModel)]="emailGuest" required
+            email pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" #email="ngModel">
+
+          <div *ngIf="email.invalid && (email.dirty || email.touched || formSubmitted)">
+            <small class="text-danger" *ngIf="email.errors?.['required']">
+              Vui lòng nhập địa chỉ email!
+            </small>
+            <small class="text-danger" *ngIf="email.errors?.['pattern']">
+              Địa chỉ email không hợp lệ!
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Ngày<span style="color: red;">*</span>
+          </label>
+          <input id="date" type="date" name="date" [(ngModel)]="reservation.date" [min]="minDate" [max]="maxDate"
+            (change)="updateTimes()" style="width: 100%;height: 40px;">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Giờ<span style="color: red;">*</span>
+          </label>
+          <select id="time" name="time" [(ngModel)]="reservation.time" required #time="ngModel">
+            <option value="">Chọn</option>
+            <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
+          </select>
+          <div *ngIf="availableTimes.length<1">
+            <small class="text-danger">Đã hết giờ đặt bàn ngày hôm nay!</small>
+          </div>
+          <div *ngIf="time.invalid && (time.dirty || time.touched || formSubmitted) && availableTimes.length>1">
+            <small class="text-danger">Vui lòng chọn giờ ăn!</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="email">
+            Số người<span style="color: red;">*</span>
+          </label>
+          <input type="number" id="people" name="guestNumber" min="1" [(ngModel)]="reservation.people" value="2"
+            required #people="ngModel">
+          <div *ngIf="people.invalid && (people.dirty || people.touched || formSubmitted)">
+            <small class="text-danger">Vui lòng nhập số lượng khách</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email">
+        Ghi chú
+      </label>
+      <textarea id="notes" name="note" placeholder="Ghi chú" [(ngModel)]="note"></textarea>
+    </div>
+    <div *ngIf="message" class="error-message">
+      {{ message }}
+    </div>
+    <div *ngIf="messages.length > 0" class="alert alert-warning">
+      <div *ngFor="let msg of messages">
+        {{ msg }}
+      </div>
+    </div>
+    <button type="submit">Đặt bàn</button>
+  </form>
+  <p class="note">
+    LƯU Ý: Chỉ khi nhận được cuộc gọi từ nhân viên để xác nhận đơn đặt bàn, yêu cầu của bạn mới được coi là đặt bàn
+    thành công.
+  </p>
+</div>

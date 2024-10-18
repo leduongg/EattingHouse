@@ -1,0 +1,878 @@
+<app-HeaderOrderStaff></app-HeaderOrderStaff>
+<div class="container">
+
+  <!-- <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a (click)="setView('table-layout')">QUẢN LÝ BÀN </a>
+          <ul>
+            <li><a [class.active]="currentView === 'table-layout'" (click)="setView('table-layout')"
+                (click)="getTableData()">Sơ đồ bàn</a></li>
+            <li><a [class.active]="currentView === 'booking-request'" (click)="setView('booking-request')"
+                (click)="getReservation()">Yêu cầu đặt
+                bàn</a></li>
+            <li><a [class.active]="currentView === 'booking-schedule'" (click)="setView('booking-schedule')"
+                (click)="getReservationData()">Lịch đặt
+                bàn</a></li>
+            <li><a [class.active]="currentView === 'booking-history'" (click)="setView('booking-history')"
+                (click)="getReservationList()">Lịch sử đặt
+                bàn</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </aside> -->
+  <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar" style="padding: 12px;">
+    <app-SidebarOrder></app-SidebarOrder>
+  </nav>
+
+  <main class="main-content">
+    <header>
+      <a href="javascript:history.back()" class="back-link">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </a>
+      <h2 *ngIf="currentView === 'table-layout'">Sơ đồ bàn</h2>
+      <h2 *ngIf="currentView === 'booking-request'">Yêu cầu đặt bàn</h2>
+      <h2 *ngIf="currentView === 'booking-schedule'">Lịch đặt bàn</h2>
+      <h2 *ngIf="currentView === 'booking-history'">Lịch sử đặt bàn</h2>
+      <h2 *ngIf="currentView === 'detail-reservation'">Chi tiết đơn đặt bàn</h2>
+      <h2 *ngIf="currentView === 'create-reservation'">Tạo đơn đặt bàn</h2>
+
+
+      <div class="col-md-3" *ngIf="currentView === 'booking-schedule'">
+        <div class="input-group">
+          <label class="input-group-text" for="dateFrom">Từ ngày</label>
+          <input type="date" id="dateFrom" class="form-control" [(ngModel)]="dateFrom" [min]="dateNow"
+            (change)="onDateFromChange()">
+        </div>
+      </div>
+      <div class="col-md-3" *ngIf="currentView === 'booking-schedule'">
+        <div class="input-group">
+          <label class="input-group-text" for="dateTo">Đến ngày</label>
+          <input type="date" id="dateTo" class="form-control" [(ngModel)]="dateTo" [min]="dateFrom"
+            (change)="onDateToChange()">
+        </div>
+      </div>
+
+      <div class="col-md-3" *ngIf="currentView === 'booking-request'">
+        <div class="create-reservation">
+          <button (click)="setView('create-reservation')">Tạo đơn đặt bàn</button>
+        </div>
+      </div>
+
+      <select id="timeframe" name="timeframe" *ngIf="currentView === 'table-layout'" [(ngModel)]="selectedTable "
+        (ngModelChange)="filterTablesByFloorAndStatus(selectedTable)" class="floor-select"
+        style="width: 20%;padding: 5px;">
+        <option value="all">Tất cả phòng/bàn</option>
+        <option value="empty">Phòng/bàn trống</option>
+      </select>
+
+    </header>
+    <hr>
+    <div *ngFor="let message of notifications; let i = index" class="notification" [ngClass]="{'show': isVisible[i]}">
+      <div class="notification-content">
+        <div class="notification-header">
+          <h5 class="notification-title">Thông báo</h5>
+          <button type="button" class="closenoti" aria-label="Close" (click)="closeNotification(i)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="notification-body">
+          {{ message }}
+        </div>
+      </div>
+    </div>
+
+
+    <section *ngIf="currentView === 'table-layout'">
+      <div class="container">
+        <div class="card short-card">
+          <div class="table-layout-buttons">
+            <button *ngFor="let floor of getFloors()" (click)="getTableOFFloor(floor)"
+              [class.active]="selectedFloor === floor">
+              {{ floor }}
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-grid">
+            <div class="table" *ngFor="let table of dataTable">
+              {{ table.lable }}<br>
+              <hr>{{ table.status === 0 ? 'Bàn trống' : 'Đang sử dụng' }}
+              <span class="icon-sl"><i class="fas fa-chair"></i>{{ table.capacity }}</span>
+              <span class="icon-table" *ngIf="table.status === 1">&#10004;</span>
+              <span class="calendar-icon" *ngIf="table.tableReservations.length >0"
+                (click)="openModalSchedule(table.tableReservations)">
+                <i class="fas fa-calendar-alt"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="reservation-modal-detail" *ngIf="isModalVisibles">
+      <div class="modal-content-detail">
+        <span class="close-detail" (click)="closeModal()">&times;</span>
+        <h2>Thông tin đặt bàn</h2><br>
+        <div *ngIf="selectedReservations.length > 0; else noReservations">
+          <ul class="reservation-list">
+            <li *ngFor="let reservation of selectedReservations" class="reservation-item">
+              <p><strong>Khách hàng:</strong> {{ reservation?.consigneeName }}</p>
+              <p><strong>Thời gian nhận bàn:</strong> {{ reservation?.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</p>
+              <p><strong>Số lượng khách:</strong> {{ reservation?.guestNumber }}</p>
+              <hr />
+            </li>
+          </ul>
+        </div>
+        <ng-template #noReservations>
+          <p>No reservations found.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <section *ngIf="currentView === 'create-reservation'">
+      <div class="container">
+        <form #reservationForm="ngForm" (ngSubmit)="submitForm(reservationForm)" class="reservation-form-new">
+          <div class="row-new">
+            <div class="col-md-4-new">
+              <div class="form-group-new">
+                <label for="date-new">Ngày <span class="required-new">*</span></label>
+                <input id="date-new" type="date" name="date" [(ngModel)]="reservation.date" [min]="minDate"
+                  [max]="maxDate" (change)="updateTimes();onFormChange();" class="input-new" required>
+              </div>
+            </div>
+            <div class="col-md-4-new">
+              <div class="form-group-new">
+                <label for="time-new">Giờ <span class="required-new">*</span></label>
+                <select id="time-new" name="time" [(ngModel)]="reservation.time" class="select-new" required
+                  #time="ngModel" (change)="onFormChange();">
+                  <option value="">Chọn</option>
+                  <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
+                </select>
+                <div *ngIf="availableTimes.length < 1" class="error-message-new">
+                  <small class="text-danger-new">Đã hết giờ đặt bàn ngày hôm nay!</small>
+                </div>
+                <div *ngIf="(time.invalid && (time.dirty || time.touched || formSubmitted) && availableTimes.length>1&&reset)||errorTime">
+                  <small class="text-danger">Vui lòng chọn giờ ăn!</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4-new">
+              <div class="form-group-new">
+                <label for="people-new">Số người <span class="required-new">*</span></label>
+                <input type="number" id="people-new" name="guestNumber" min="1" [(ngModel)]="reservation.people"
+                  class="input-new" value="2" required #people="ngModel" (ngModelChange)="onFormChange();">
+                <div *ngIf="people.invalid && (people.dirty || people.touched || formSubmitted)"
+                  class="error-message-new">
+                  <small class="text-danger-new">Vui lòng nhập số lượng khách</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="button-container">
+            <button *ngIf="showPersonalInfo===false" type="button" (click)="checkAvailability()" class="button-new">
+              Kiểm tra
+            </button>
+          </div>
+
+          <div *ngIf="showPersonalInfo">
+            <div class="row-new">
+              <div class="col-md-4-new">
+                <div class="form-group-new">
+                  <label for="name-new">Tên người đặt <span class="required-new">*</span></label>
+                  <input type="text" id="name-new" name="consigneeName" placeholder="Nhập tên"
+                    [(ngModel)]="consigneeName" class="input-new" required #name="ngModel">
+                  <div *ngIf="name.invalid && (name.dirty || name.touched || formSubmitted)" class="error-message-new">
+                    <small class="text-danger-new">Vui lòng nhập Tên quý khách!</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4-new">
+                <div class="form-group-new">
+                  <label for="phone-new">Số điện thoại <span class="required-new">*</span></label>
+                  <input type="tel" id="phone-new" name="guestPhone" placeholder="Nhập số điện thoại"
+                    [(ngModel)]="guestPhone" class="input-new" required pattern="^0\d{9,10}$" #phone="ngModel">
+                  <div *ngIf="phone.invalid && (phone.dirty || phone.touched || formSubmitted)"
+                    class="error-message-new">
+                    <small class="text-danger-new" *ngIf="phone.errors?.['pattern']">Số điện thoại phải có 10 hoặc 11
+                      chữ số!</small>
+                    <small class="text-danger-new" *ngIf="phone.errors?.['required'] && !phone.errors?.['pattern']">Vui
+                      lòng nhập số điện thoại!</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4-new">
+                <div class="form-group-new">
+                  <label for="email-new">Email</label>
+                  <input type="text" id="email-new" name="email" placeholder="Nhập email của bạn"
+                    [(ngModel)]="emailGuest" class="input-new"
+                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$">
+                </div>
+              </div>
+              <div class="col-md-4-new">
+                <div class="form-group-new">
+                  <label for="note">Ghi chú</label>
+                  <textarea id="notes" name="note" placeholder="Ghi chú" [(ngModel)]="note"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="createlable" *ngIf="selectedTableIds.length>0">
+              <p class="createlable-p">Bàn đã xếp: </p>
+              <span *ngFor="let table of getSelectedTableNames(); let i = index" class="table-createlable-label">
+                {{ table }}
+              </span>
+            </div>
+            <div class="button-group-new">
+              <button type="button" (click)="openMenuPopup()" class="add-button-new">
+                <i class="fas fa-plus"></i> Thêm món
+              </button>
+              <button type="button" (click)="assignTable(dateTime)" class="add-button-new">
+                <i class="fas fa-plus"></i> Xếp bàn
+              </button>
+            </div>
+            <br>
+            <div *ngIf="message" class="error-message">
+              {{ message }}
+            </div>
+            <div *ngIf="messages.length > 0" class="alert alert-warning">
+              <div *ngFor="let msg of messages">
+                {{ msg }}
+              </div>
+            </div>
+            <button type="submit" class="button-submit-new">Đặt bàn</button>
+          </div>
+          <br>
+          <div class="dish" class="cart" *ngIf="cartItems && cartItems.length > 0">
+            <table>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Món ăn</th>
+                  <th>Giá bán</th>
+                  <th>Số lượng</th>
+                  <th>Thành tiền</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody *ngFor="let item of cartItems">
+                <tr>
+                  <td><img class="img-fluid" [src]="item.imageUrl" alt="Item Image"
+                      style="max-width: 100%; height: 56px;"></td>
+                  <td>{{ item.itemName||item.nameCombo }}</td>
+                  <td>{{ item.discountedPrice || item.price | currencyFormat}} </td>
+                  <td>
+                    <div class="quantity-control">
+                      <a (click)="decreaseQuantity(item)" class="icon" style="cursor: pointer;">
+                        <i class="fas fa-minus" style="color: black; font-size: 10px;"></i>
+                      </a>
+                      <input type="number" [(ngModel)]="item.quantity" class="quantity-input" [min]="1" [max]="maxValue"
+                        (input)="validateInput(item, maxValue)" (keydown)="preventDelete($event, item.quantity)"
+                        pattern="[0-9]*" inputmode="numeric" [ngModelOptions]="{standalone: true}"
+                        style="appearance: none; -moz-appearance: textfield;" required />
+                      <a (click)="increaseQuantity(item)" class="icon" style="cursor: pointer;">
+                        <i class="fas fa-plus" style="color: black; font-size: 10px;"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td><span class="price"> {{ getTotalPrice(item) | currencyFormat}}</span></td>
+                  <td><button class="delete icon-button" (click)="removeItem(item)">🗑️</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="summary" *ngIf="cartItems && cartItems.length > 0;">
+            <div class="summary-content">
+              <p style="font-weight: bold;">Tổng cộng: <span id="total">{{ getTotalCartPrice() | currencyFormat }}
+                </span></p>
+            </div>
+          </div>
+          <div *ngIf="message" class="error-message-new">{{ message }}</div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="menuModal" class="custom-modal" [ngClass]="{'custom-show-menu': isMenuPopupOpen===true}">
+      <div class="custom-modal-dialog" role="document">
+        <div class="custom-modal-content">
+          <span class="custom-close" (click)="closeMenuPopup()">&times;</span>
+          <app-menu [isReser]="true"></app-menu> <!-- Pass the value here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="confirmReservationModal" class="modal-custom" [ngClass]="{'show': isConfirmModalOpen}">
+      <div class="modal-dialog-custom">
+        <div class="modal-content-custom">
+          <span class="custom-close" (click)="closeConfirmModal()">&times;</span>
+          <h2>Xác nhận đặt bàn</h2>
+
+          <div class="modal-body-custom">
+            <p><strong>Tên người đặt:</strong> {{ consigneeName }}</p>
+            <p><strong>Số điện thoại:</strong> {{ guestPhone }}</p>
+            <p><strong>Ngày giờ nhận bàn:</strong> {{ reservation.date }} {{ reservation.time }}</p>
+            <p><strong>Email:</strong> {{ emailGuest }}</p>
+            <p><strong>Số người:</strong> {{ reservation.people }}</p>
+            <p><strong>Ghi chú:</strong> {{ note }}</p>
+            <br *ngIf="selectedTableIds.length>0">
+            <p *ngIf="selectedTableIds.length>0"><strong>Bàn đã chọn:</strong>
+              <span *ngFor="let table of getSelectedTableNames()" class="table-label-custom">{{ table }}</span>
+            </p>
+            <br>
+            <div *ngIf="cartItems && cartItems.length > 0">
+              <p><strong>Món ăn đã chọn:</strong></p>
+              <table class="cart-items-table">
+                <thead>
+                  <tr>
+                    <th>Món ăn</th>
+                    <th>Giá bán</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of cartItems">
+                    <td>{{ item.itemName || item.nameCombo }}</td>
+                    <td>{{ item.discountedPrice || item.price | currencyFormat}} </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ getTotalPrice(item) | currencyFormat }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="summary-content">
+                <p style="font-weight: bold;">Tổng cộng: <span id="total">{{ getTotalCartPrice() | currencyFormat }}
+                  </span></p>
+              </div>
+            </div>
+          </div>
+          <!-- Confirmation Buttons -->
+          <div class="modal-footer-custom">
+            <button type="button" class="confirm-button" (click)="createReservation()">Xác nhận</button>
+            <button type="button" class="cancel-button" (click)="closeConfirmModal()">Hủy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section *ngIf="currentView === 'booking-schedule'">
+      <div class="container">
+        <div class="card">
+          <div class="reservation-grid">
+            <div class="reservation" *ngFor="let reservation of dataReservationAccept; let i = index"
+              [ngClass]="getReservationClass(reservation.reservationTime)">
+              <div class="row">
+                <div class="cell">
+                  <span class="data">{{reservation.consigneeName}} - {{reservation.guestPhone}}</span>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-md-3" style="display: flex; justify-content: center; align-items: center;"
+                  *ngIf="reservation.tableOfReservation && reservation.tableOfReservation.length > 1">
+                  <span class="number-table">{{ reservation.tableOfReservation[0].lable }}</span>
+                  <span style="font-weight: bold; font-size: 24px; cursor: pointer;"
+                    (click)="openTableModal(i)">...</span>
+                </div>
+                <div class="custom-modal-detail" *ngIf="showModals[i]">
+                  <div class="custom-modal-detail-content">
+                    <h2>Danh sách các bàn đã xếp </h2>
+                    <div *ngFor="let table of reservation.tableOfReservation">
+                      <span class="number-table">{{ table.lable }}</span>
+                    </div>
+                    <button (click)="closeTableModal(i)">Đóng</button>
+                  </div>
+                </div>
+                <div class="custom-modal-detail-overlay" *ngIf="showModals[i]"></div>
+
+                <div class="col-md-3" style="display: flex;justify-content: center;align-items: center;"
+                  *ngIf="reservation.tableOfReservation && reservation.tableOfReservation.length === 1">
+                  <span class="number-table">{{ reservation.tableOfReservation[0].lable }}</span>
+                </div>
+
+                <div class="col-md-3" style="display: flex;justify-content: center;align-items: center;"
+                  *ngIf="reservation.tableOfReservation && reservation.tableOfReservation.length === 0">
+                  <span class="number-table">?</span>
+                </div>
+                <div class="vertical-line"></div>
+                <div class="col-md-8">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="cell">
+                        <span>{{ reservation.reservationTime | date:'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                    </div>
+                    <div class="vertical-line"></div>
+                    <div class="col-md-3" style="display: flex;justify-content: center;align-items: center;">
+                      <div class="cell">
+                        <span class="data"><i class="fas fa-user"></i> {{reservation.guestNumber}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="cell">
+                    <span class="data"><i class="fas fa-coins"></i> {{reservation.deposits | currencyFormat}}</span>
+                  </div>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-md-4" style="height: 20px;">
+                  <div class="dropdown" style="position: relative;display: inline-block;">
+                    <button class="icon" (click)="toggleDropdown(i)">...</button>
+                    <div class="dropdown-content" [class.show]="reservation.isDropdownOpen">
+                      <a *ngIf="reservation.tableOfReservation.length===0"
+                        (click)="openPopup(reservation.reservationId,reservation.reservationTime,reservation.tableOfReservation )">Xếp
+                        bàn</a>
+                      <a *ngIf="reservation.tableOfReservation.length>0"
+                        (click)="openPopup(reservation.reservationId,reservation.reservationTime,reservation.tableOfReservation)">Thay
+                        đổi
+                        bàn</a>
+                      <a *ngIf="reservation.tableOfReservation.length>0"
+                        (click)="getReservationById(reservation.reservationId)">Chi tiết</a>
+                      <a (click)="openCancelModal(reservation)">Hủy đặt bàn</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-8" style="display: flex;justify-content: center;align-items: center;height: 20px;">
+                  <span class="label-reser"
+                    (click)="checkAndConfirmReservation(reservation.reservationId, 3, reservation.order?.orderId, reservation?.reservationTime, reservation.tableOfReservation, i)"
+                    [class.disabled]="!reservation.tableOfReservation || reservation.tableOfReservation.length === 0"
+                    *ngIf="reservation.tableOfReservation && reservation.tableOfReservation.length > 0 ">
+                    Khách nhận bàn
+                  </span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!dataReservationAccept || dataReservationAccept.length === 0" style="text-align: center;">
+            <p>Không có đơn đặt bàn cho ngày hôm nay</p>
+          </div>
+          <div class="pagination" *ngIf="totalPages > 0">
+            <button (click)="onPreviousPage()" [disabled]="currentPage === 1">
+              <i class="fas fa-arrow-left"></i> <!-- Icon mũi tên trái -->
+            </button>
+
+            <input type="number" [(ngModel)]="currentPage" (keyup.enter)="goToDesiredPage()" min="1"
+              max="{{ totalPages }}">
+
+            <span>of {{ totalPages }}</span>
+
+            <button (click)="onNextPage()" [disabled]="currentPage === totalPages">
+              <i class="fas fa-arrow-right"></i> <!-- Icon mũi tên phải -->
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isModalVisible" class="reservation-backdrop"></div>
+      <div class="reservation-modal" [ngStyle]="{'display': isModalVisible ? 'block' : 'none'}">
+        <div class="reservation-modal-content">
+          <h4>Xác nhận khách nhận bàn</h4><br>
+          <p class="modal-text">Họ tên: {{guestInfo?.consigneeName}}</p>
+          <p class="modal-text">Số điện thoại: {{guestInfo?.guestPhone}}</p>
+          <p class="modal-text">Số lượng người: {{guestInfo?.guestNumber}} người</p>
+          <p class="modal-text">Thời gian đặt bàn: {{guestInfo?.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</p>
+          <p *ngIf="modalMessage" class="modal-text" style="color: red;">{{ modalMessage }}</p>
+          <p *ngIf="modalMessage" class="modal-text" style="color: red;">Bạn có chắc cho khách nhận nhận bàn?</p>
+        </div>
+        <div *ngIf="messageerrorTable" class="alert alert-danger" style="color: red; margin-top: 10px;">
+          {{ messageerrorTable }}
+        </div>
+        <div *ngIf="errorMessages" class="alert alert-danger" style="max-width: 500px;">
+          {{ errorMessages }}
+        </div>
+        <div class="reservation-modal-footer">
+          <button (click)="confirmReservation()">Xác nhận</button>
+          <button (click)="cancelReservation()">Hủy</button>
+        </div>
+      </div>
+
+      <!-- Confirm Save Modal -->
+      <div class="modal fade" id="confirmSaveModal" tabindex="-1" role="dialog" aria-labelledby="confirmSaveModalLabel"
+        >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content" style="width: 110%;margin: 60% 110%;">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmSaveModalLabel">Xác nhận xếp bàn</h5>
+              <span type="button" class="close" data-dismiss="modal" aria-label="Close"
+                (click)="closeConfirmSaveModal()">
+                <span aria-hidden="true">&times;</span>
+              </span>
+            </div>
+            <div class="modal-body">
+              Bạn có chắc chắn muốn đăng ký phòng/bàn sau cho đơn này không?
+              <ul style="margin-left: 20px;">
+                {{ getSelectedTableNames().join(', ') }}
+              </ul>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                (click)="closeConfirmSaveModal()">Hủy</button>
+              <button type="button" class="btn btn-primary" (click)="confirmSave()">Xác nhận</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Main Modal -->
+    <div class="modal fade" id="updateTimeModal" tabindex="-1" role="dialog" aria-labelledby="updateTimeModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content" style="overflow: auto;">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateTimeModalLabel">Đăng ký bàn</h5>
+            <div class="text-center text-white flex-fill" style="font-size: 18px;">
+              {{ reservationTimeSelected | date: 'dd/MM/yyyy - HH:mm' }}
+            </div>
+            <span type="button" class="close" data-dismiss="modal" aria-label="Close"
+              (click)="closePopup()">&times;</span>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="table-status-container">
+                <div>Xếp bàn cho {{guestNumber}} người:</div>
+
+                <div class="selected-tables-container" *ngIf="getSelectedTableNames().length > 0">
+                  <span>Đã chọn:</span>
+                  <span *ngFor="let table of getSelectedTableNames(); let i = index" class="table-label">
+                    {{ table }}
+                    <span (click)="removeTable(i)" class="remove-button">&times;</span>
+                  </span>
+                </div>
+
+                <span *ngIf="getSelectedTableNames().length === 0">
+                  Chưa chọn phòng/bàn
+                </span>
+
+                <div class="checkbox-container">
+                  <label *ngIf="ishas === false">
+                    <i class="fas fa-times-circle" style="color: red;"></i>
+                    <span style="color: red;">Chưa đủ</span>
+                  </label>
+                  <label *ngIf="ishas === true">
+                    <i class="fas fa-check-circle" style="color: green;"></i>
+                    <span style="color: green;">Đã đủ</span>
+                  </label>
+                </div>
+              </div>
+
+              <div *ngIf="!showPersonalInfo" class="col-md-3"
+                style="display: flex; justify-content: center; align-items: center;">
+                <select id="floor" name="floor" [(ngModel)]="selectedFloor"
+                  (change)="getTableOFFloorEmpty(selectedFloor,reservationTimeSelected)" class="floor-select">
+                  <option *ngFor="let floor of getFloors()" [value]="floor" [class.active]="selectedFloor === floor">
+                    {{ floor }}
+                  </option>
+                </select>
+              </div>
+              <div *ngIf="showPersonalInfo" class="col-md-3"
+                style="display: flex; justify-content: center; align-items: center;">
+                <select id="floor" name="floor" [(ngModel)]="selectedFloor"
+                  (change)="getTableOFFloorEmpty(selectedFloor,dateTime)" class="floor-select">
+                  <option *ngFor="let floor of getFloors()" [value]="floor" [class.active]="selectedFloor === floor">
+                    {{ floor }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-7">
+                <div class="card" style="max-height: 400px; overflow: auto;">
+                  <div class="table-grid">
+                    <div class="table" *ngFor="let table of tableEmpty" (click)="toggleTableSelection(table)">
+                      {{ table.lable }}<br>
+                      <span class="icon-sl">
+                        <i class="fas fa-chair"></i>{{ table.capacity }}
+                      </span>
+                      <span class="icon-table" style="left: 170px;"
+                        *ngIf="selectedTableIds.includes(table.tableId)">&#10004;</span>
+                    </div>
+                  </div>
+                  <div *ngIf="tableEmpty.length < 1" style="height: 100px;">
+                    <p>Khu vực này không còn phòng/bàn trống</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="validMessage" class="alert alert-danger" style="color: red; margin-top: 10px;">
+            {{ validMessage }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" style="background-color: red;" class="btn btn-secondary"
+              (click)="closePopup()">Đóng</button>
+            <button *ngIf="showPersonalInfo === false" type="button" class="btn btn-primary"
+              (click)="openConfirmSaveModal()">Lưu
+              thay đổi</button>
+            <button *ngIf="showPersonalInfo===true" type="button" class="btn btn-primary"
+              (click)="closeTableAssignPopup()">Lưu
+              thay đổi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Confirm Cancel Modal -->
+    <div class="reservation-cancel-modal" *ngIf="showCancelModal">
+      <div class="reservation-cancel-modal-content">
+        <h2>Xác nhận hủy đặt bàn</h2>
+        <label for="cancelReason">Lý do hủy:</label>
+        <textarea id="cancelReason" [(ngModel)]="cancelReason" rows="4" style="width: 100%;"></textarea>
+        <div *ngIf="errorMessage" class="alert alert-danger" style="color: red; margin-top: 10px;">
+          {{ errorMessage }}
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="confirm-button" (click)="confirmCancel($event)">Xác nhận</button>
+          <button class="cancel-button" (click)="closeCancelModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+    <div class="reservation-cancel-modal-overlay" *ngIf="showCancelModal"></div>
+
+    <!-- Confirm Accept Modal -->
+    <div class="reservation-accept-modal" *ngIf="showAcceptModal">
+      <div class="reservation-accept-modal-content">
+        <h2>Xác nhận chấp nhận đặt bàn</h2><br>
+        <div class="reservation-detail">
+          <p><strong>Khách hàng:</strong> {{ detailRes?.consigneeName }}</p>
+          <p><strong>Thời gian nhận bàn:</strong> {{ detailRes?.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</p>
+          <p><strong>Số lượng khách:</strong> {{ detailRes?.guestNumber }}</p>
+        </div>
+        <div *ngIf="message" class="error-message">
+          {{ message }}
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="confirm-button" (click)="confirmAccept($event)">Xác nhận</button>
+
+          <button class="cancel-button" (click)="closeAcceptModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+    <div class="reservation-accept-modal-overlay" *ngIf="showAcceptModal"></div>
+    <section *ngIf="currentView === 'booking-request'">
+      <div class="container">
+        <div class="card">
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên khách hàng</th>
+                  <th>Số điện thoại</th>
+                  <th>Ngày giờ nhận bàn</th>
+                  <th>Số lượng khách</th>
+                  <th>Đặt cọc</th>
+                  <th>Trạng thái đơn</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody *ngFor="let reservation of dataReservationPending">
+                <ng-container>
+                  <tr>
+                    <td>{{reservation.consigneeName}}</td>
+                    <td>{{reservation.guestPhone}}</td>
+                    <td>{{ reservation.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</td>
+                    <td>{{reservation.guestNumber}}</td>
+                    <td>{{reservation.deposits | currencyFormat}}</td>
+                    <td><span [ngClass]="getStatusLabel(reservation.status).class" class="status-label">{{
+                        getStatusLabel(reservation.status).label }}</span></td>
+                    <td>
+                      <button type="button" class="btn btn-primary btn-sm"
+                        (click)="getReservationById(reservation.reservationId)">Chi tiết</button>
+                    </td>
+                    <td><button type="button" class="btn btn-primary btn-sm" style="background-color: green;"
+                        (click)="openAcceptModal(reservation)">Nhận đơn</button></td>
+                    <td>
+                      <button type="button" class="btn btn-primary btn-sm" style="background-color: red;"
+                        (click)="openCancelModal(reservation)">Hủy đơn</button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+          <br>
+          <div *ngIf="!dataReservationPending || dataReservationPending.length === 0" style="text-align: center;">
+            <p>Không có yêu cầu đặt bàn </p>
+          </div>
+          <div class="pagination" *ngIf="totalPages > 0">
+            <button (click)="onPreviousPage()" [disabled]="currentPage === 1">
+              <i class="fas fa-arrow-left"></i> <!-- Icon mũi tên trái -->
+            </button>
+
+            <input type="number" [(ngModel)]="currentPage" (keyup.enter)="goToDesiredPage()" min="1"
+              max="{{ totalPages }}">
+
+            <span>of {{ totalPages }}</span>
+
+            <button (click)="onNextPage()" [disabled]="currentPage === totalPages">
+              <i class="fas fa-arrow-right"></i> <!-- Icon mũi tên phải -->
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <section *ngIf="currentView === 'detail-reservation'">
+
+      <div class="container">
+        <div class="card" *ngIf="reservationDetail">
+          <details open>
+            <summary>Thông tin đặt bàn</summary>
+            <div class="row">
+              <p>Ngày giờ nhận bàn<span>:{{ reservationDetail.data.reservationTime | date:'dd/MM/yyyy HH:mm' }}</span>
+              </p>
+              <p>Số lượng khách<span>:{{ reservationDetail.data.guestNumber}}</span></p>
+              <p>Ghi chú<span>:{{ reservationDetail.data.note }}</span></p>
+              <p>Trạng thái đơn<span [ngClass]="getStatusLabel(reservationDetail.data.status).class">:{{
+                  getStatusLabel(reservationDetail.data.status).label }}</span></p>
+            </div>
+          </details>
+          <details>
+            <summary>Phòng/Bàn và khu vực</summary>
+            <div class="row" *ngIf="reservationDetail?.data.tableOfReservation.length > 0">
+              <div [innerHTML]="formatTables(reservationDetail?.data.tableOfReservation)"></div>
+            </div>
+          </details>
+          <details>
+            <summary>Thông tin khách hàng</summary>
+            <div class="row">
+              <p>Họ tên<span>:{{ reservationDetail.data.consigneeName }}</span></p>
+              <p>Số điện thoại<span>:{{ reservationDetail.data.guestPhone }}</span></p>
+              <p>Email<span>:{{ reservationDetail?.data.email }}</span></p>
+              <p>Địa chỉ<span>:{{ reservationDetail?.data.address }}</span></p>
+            </div>
+          </details>
+          <details>
+            <summary>Thông tin đơn hàng</summary>
+            <div>
+              <div class="cart-container">
+                <div class="cart-header"
+                  *ngIf="reservationDetail?.data.order?.orderDetails && reservationDetail.data.order.orderDetails.length>0">
+                  <div class="row">
+                    <div class="col-2"></div>
+                    <div class="col">
+                      <h5><b>Đồ ăn</b></h5>
+                    </div>
+                    <div class="col">
+                      <h5><b>Đơn giá</b></h5>
+                    </div>
+                    <div class="col">
+                      <h5><b>Số lượng</b></h5>
+                    </div>
+                    <div class="col">
+                      <h5><b>Tổng tiền</b></h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="cart-items">
+                  <div class="row border-top border-bottom"
+                    *ngFor="let item of reservationDetail?.data?.order?.orderDetails">
+                    <div class="row main align-items-center">
+                      <div class="col-2">
+                        <img class="img-fluid" [src]="item.imageUrl" alt="Item Image"
+                          style="max-width: 100%; height: 56px;">
+                      </div>
+                      <div class="col">
+                        <div>{{ item.itemName || item.nameCombo }}</div>
+                      </div>
+                      <div class="col">
+                        <div>{{ item.discountedPrice || item.price | currencyFormat}}</div>
+                      </div>
+                      <div class="col">
+                        <span>{{ item.quantity }}</span>
+                      </div>
+                      <div class="col price-close" style="align-items:center;">
+                        <span class="price">{{ item.unitPrice | currencyFormat}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+
+    <section *ngIf="currentView === 'booking-history'">
+      <div class="container">
+        <div class="card">
+          <div class="tabs">
+            <button class="tab" *ngFor="let tab of tabs; let i = index" [class.active]="i === selectedIndex"
+              (click)="selectTab(i)">
+              {{ tab }}
+            </button>
+            <input type="text" placeholder="Nhập từ khóa tìm kiếm..." [(ngModel)]="searchTerm"
+              (input)="onSearchChange($event)">
+          </div>
+          <br>
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên khách hàng</th>
+                  <th>Số điện thoại</th>
+                  <th>Ngày giờ nhận bàn</th>
+                  <th>Số lượng khách</th>
+                  <th>Đặt cọc</th>
+                  <th>Khu vực, bàn</th>
+                  <th>Trạng thái đơn</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody *ngFor="let reservation of dataReservation">
+                <ng-container>
+                  <tr>
+                    <td>{{reservation.consigneeName}}</td>
+                    <td>{{reservation.guestPhone}}</td>
+                    <td>{{ reservation.reservationTime | date:'dd/MM/yyyy - HH:mm' }}</td>
+                    <td>{{reservation.guestNumber}}</td>
+                    <td>{{reservation.deposits | currencyFormat}}</td>
+                    <td>
+                      <div [innerHTML]="formatTables(reservation.tableOfReservation)"></div>
+                    </td>
+                    <td>
+                      <span [ngClass]="getStatusLabel(reservation.status).class" class="status-label">{{
+                        getStatusLabel(reservation.status).label }}</span>
+                    </td>
+
+
+                    <td>
+                      <button type="button" class="btn btn-primary btn-sm"
+                        (click)="getReservationById(reservation.reservationId)">Chi tiết</button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+
+
+            </table>
+          </div>
+          <br>
+          <div *ngIf="!dataReservation || dataReservation.length === 0" style="text-align: center;">
+            <p>Không có dữ liệu </p>
+          </div>
+          <div class="pagination" *ngIf="totalPages > 0">
+            <button (click)="onPreviousPage()" [disabled]="currentPage === 1">
+              <i class="fas fa-arrow-left"></i> <!-- Icon mũi tên trái -->
+            </button>
+
+            <input type="number" [(ngModel)]="currentPage" (keyup.enter)="goToDesiredPage()" min="1"
+              max="{{ totalPages }}">
+
+            <span>of {{ totalPages }}</span>
+
+            <button (click)="onNextPage()" [disabled]="currentPage === totalPages">
+              <i class="fas fa-arrow-right"></i> <!-- Icon mũi tên phải -->
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
